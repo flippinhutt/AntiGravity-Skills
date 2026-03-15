@@ -1,0 +1,23 @@
+# Source and Build files
+src/**
+tsconfig.json
+esbuild.js
+node_modules/**
+
+# GSD and Agent Metadata
+.agent/**
+.gemini/**
+.gsd/**
+
+# IDE and Project metadata
+.vscode/**
+.gitignore
+.git/**
+
+# Temporary files
+tmp/**
+*.vsix
+out/**
+
+# Documentation source (optional, but package.json handles README/LICENSE)
+# .gh-pages/**
