@@ -30,9 +30,16 @@ export class LocalSkillProvider implements vscode.TreeDataProvider<SkillItem> {
 
   private getTopLevelSkills(): SkillItem[] {
     const skills: SkillItem[] = [];
+    const config = vscode.workspace.getConfiguration('antigravity');
     
     // 1. Check Global
-    const globalPath = path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
+    let globalPath = config.get<string>('customGlobalSkillsPath', '').trim();
+    if (!globalPath) {
+        globalPath = path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
+    } else if (globalPath.startsWith('~')) {
+        globalPath = path.join(os.homedir(), globalPath.slice(1));
+    }
+
     if (this.pathExists(globalPath)) {
         skills.push(...this.readSkillDirectories(globalPath, '(Global)'));
     }
@@ -52,11 +59,18 @@ export class LocalSkillProvider implements vscode.TreeDataProvider<SkillItem> {
 
   private readSkillDirectories(skillsPath: string, description: string): SkillItem[] {
       const skills: SkillItem[] = [];
+      const config = vscode.workspace.getConfiguration('antigravity');
+      const hideInvalid = config.get<boolean>('hideInvalidSkills', false);
+      
       const entries = fs.readdirSync(skillsPath, { withFileTypes: true });
       for (const entry of entries) {
           if (entry.isDirectory()) {
               const fullPath = path.join(skillsPath, entry.name);
               const hasSkillMd = fs.existsSync(path.join(fullPath, 'SKILL.md'));
+
+              if (!hasSkillMd && hideInvalid) {
+                  continue;
+              }
 
               const item = new SkillItem(
                   entry.name,

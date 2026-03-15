@@ -65,12 +65,12 @@ export function activate(context: vscode.ExtensionContext) {
                  return;
              }
 
-             const globalDir = path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
-             const targetDir = path.join(globalDir, item.label);
+             const targetDir = await promptForSkillTarget(item.label);
+             if (!targetDir) { return; } // User cancelled
 
              if (fs.existsSync(targetDir)) {
                  const answer = await vscode.window.showWarningMessage(
-                     `A skill named "${item.label}" already exists locally. Overwrite?`,
+                     `A skill named "${item.label}" already exists there. Overwrite?`,
                      { modal: true },
                      'Overwrite'
                  );
@@ -95,12 +95,6 @@ export function activate(context: vscode.ExtensionContext) {
              });
         }),
         vscode.commands.registerCommand('antigravity.createSkill', async () => {
-             const workspaceFolders = vscode.workspace.workspaceFolders;
-             if (!workspaceFolders || workspaceFolders.length === 0) {
-                 vscode.window.showErrorMessage('Please open a workspace to create a new skill.');
-                 return;
-             }
-
              const skillName = await vscode.window.showInputBox({
                  prompt: 'Enter the new skill name (no spaces, e.g., my-awesome-skill)',
                  validateInput: text => {
@@ -110,7 +104,8 @@ export function activate(context: vscode.ExtensionContext) {
 
              if (!skillName) { return; }
 
-             const targetDir = path.join(workspaceFolders[0].uri.fsPath, '.gemini', 'antigravity', 'skills', skillName);
+             const targetDir = await promptForSkillTarget(skillName);
+             if (!targetDir) { return; } // User cancelled
 
              if (fs.existsSync(targetDir)) {
                  vscode.window.showErrorMessage(`Skill directory already exists: ${skillName}`);
@@ -216,3 +211,45 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+// --- Helpers ---
+
+function getGlobalSkillsPath(): string {
+    const config = vscode.workspace.getConfiguration('antigravity');
+    let globalPath = config.get<string>('customGlobalSkillsPath', '').trim();
+    if (!globalPath) {
+        globalPath = path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
+    } else if (globalPath.startsWith('~')) {
+        globalPath = path.join(os.homedir(), globalPath.slice(1));
+    }
+    return globalPath;
+}
+
+async function promptForSkillTarget(skillName: string): Promise<string | undefined> {
+    const globalPath = getGlobalSkillsPath();
+    const globalTarget = path.join(globalPath, skillName);
+
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+        // No workspace open, default automatically to global
+        return globalTarget;
+    }
+
+    const options = [
+        { label: '$(globe) Global', description: globalTarget, target: globalTarget },
+        ...workspaceFolders.map(f => {
+            const workspaceTarget = path.join(f.uri.fsPath, '.gemini', 'antigravity', 'skills', skillName);
+            return {
+                label: `$(folder) Workspace (${f.name})`,
+                description: workspaceTarget,
+                target: workspaceTarget
+            };
+        })
+    ];
+
+    const choice = await vscode.window.showQuickPick(options, {
+        placeHolder: `Where should "${skillName}" be placed?`
+    });
+
+    return choice ? choice.target : undefined;
+}

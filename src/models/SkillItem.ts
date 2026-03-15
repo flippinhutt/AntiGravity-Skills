@@ -2,6 +2,10 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 export class SkillItem extends vscode.TreeItem {
+  public githubOwnerRepo?: string;
+  public githubPath?: string;
+  public downloadUrl?: string;
+
   constructor(
     public readonly label: string,
     public readonly description: string | undefined,
@@ -18,7 +22,7 @@ export class SkillItem extends vscode.TreeItem {
       this.command = {
         title: 'Open File',
         command: 'antigravity.openSkillFile',
-        arguments: [this.fullPath],
+        arguments: [this.fullPath, this],
       };
     } else {
       this.iconPath = new vscode.ThemeIcon('symbol-namespace');

@@ -77,6 +77,16 @@
           "items": {
             "type": "string"
           }
+        },
+        "antigravity.customGlobalSkillsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional: Override the default global skills directory (~/.gemini/antigravity/skills). Use an absolute path or paths starting with '~'."
+        },
+        "antigravity.hideInvalidSkills": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, hides any folders in your skills directories that do not contain a SKILL.md file."
         }
       }
     },

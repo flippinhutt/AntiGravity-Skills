@@ -30,3 +30,13 @@
 **Status**: ✅ Complete
 **Objective**: Refine the editing experience, add error handling, and ensure smooth UX transitions.
 **Requirements**: REQ-05
+
+### Phase 5: Remote Repo Management UI
+**Status**: ✅ Complete
+**Objective**: Provide UI commands to add and remove GitHub repositories from the Settings directly from the VSCode sidebar.
+**Requirements**: REQ-06 (extended)
+
+### Phase 6: Workspace & Settings Polish
+**Status**: ✅ Complete
+**Objective**: Allow flexible, robust skill tracking in project workspaces alongside powerful user preference settings.
+**Requirements**: REQ-06 (extended)
