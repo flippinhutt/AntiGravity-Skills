@@ -27,13 +27,18 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
         const contents = await this.githubService.getRepoContents(repoStr);
         
         return contents.map(item => {
-           return new SkillItem(
+           const skillItem = new SkillItem(
               item.name,
               item.type === 'dir' ? '(Directory)' : undefined,
               item.html_url, // For remote, the payload might be the URL rather than local path
               item.type === 'dir' ? 'skill' : 'file',
               item.type === 'dir' ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
            );
+           skillItem.contextValue = item.type === 'dir' ? 'skill' : 'file';
+           // store ownerRepo and internal path loosely for the install command
+           (skillItem as any).githubOwnerRepo = repoStr;
+           (skillItem as any).githubPath = item.path;
+           return skillItem;
         }).sort((a,b) => {
            if(a.itemType === 'skill' && b.itemType === 'file') return -1;
            if(a.itemType === 'file' && b.itemType === 'skill') return 1;

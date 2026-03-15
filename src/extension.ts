@@ -1,7 +1,11 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 import { LocalSkillProvider } from './providers/LocalSkillProvider';
 import { RemoteSkillProvider } from './providers/RemoteSkillProvider';
 import { GitHubService } from './services/GitHubService';
+import { SkillItem } from './models/SkillItem';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
@@ -35,6 +39,42 @@ export function activate(context: vscode.ExtensionContext) {
                  vscode.window.showInformationMessage('Successfully authenticated with GitHub.');
                  remoteSkillProvider.refresh();
             }
+        }),
+        vscode.commands.registerCommand('antigravity.installSkill', async (item: SkillItem) => {
+             const anyItem = item as any;
+             if (!anyItem.githubOwnerRepo || !anyItem.githubPath) {
+                 vscode.window.showErrorMessage('Cannot install skill: Missing GitHub metadata on tree item.');
+                 return;
+             }
+
+             const globalDir = path.join(os.homedir(), '.gemini', 'antigravity', 'skills');
+             const targetDir = path.join(globalDir, item.label);
+
+             if (fs.existsSync(targetDir)) {
+                 const answer = await vscode.window.showWarningMessage(
+                     `A skill named "${item.label}" already exists locally. Overwrite?`,
+                     { modal: true },
+                     'Overwrite'
+                 );
+                 if (answer !== 'Overwrite') {
+                     return;
+                 }
+             }
+
+             vscode.window.withProgress({
+                 location: vscode.ProgressLocation.Notification,
+                 title: `Installing ${item.label}...`,
+                 cancellable: false
+             }, async (progress) => {
+                 try {
+                     const githubService = new GitHubService();
+                     await githubService.downloadFolder(anyItem.githubOwnerRepo, anyItem.githubPath, targetDir);
+                     vscode.commands.executeCommand('antigravity.refreshLocalSkills');
+                     vscode.window.showInformationMessage(`Successfully installed ${item.label}!`);
+                 } catch (err: any) {
+                     vscode.window.showErrorMessage(`Failed to install ${item.label}: ${err.message}`);
+                 }
+             });
         })
     );
 

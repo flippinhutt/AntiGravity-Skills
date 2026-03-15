@@ -32,6 +32,15 @@
         }
       ]
     },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "antigravity.installSkill",
+          "when": "view == antigravity.remoteSkills && viewItem == skill",
+          "group": "inline"
+        }
+      ]
+    },
     "configuration": {
       "title": "Antigravity Skill Manager",
       "properties": {
@@ -56,6 +65,11 @@
       {
         "command": "antigravity.githubLogin",
         "title": "Antigravity: Login to GitHub"
+      },
+      {
+        "command": "antigravity.installSkill",
+        "title": "Install Skill",
+        "icon": "$(cloud-download)"
       }
     ]
   },

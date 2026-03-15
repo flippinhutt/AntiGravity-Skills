@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export interface GitHubContent {
     name: string;
@@ -69,6 +71,44 @@ export class GitHubService {
             console.error(`Error fetching contents for ${ownerRepo}:`, error);
             vscode.window.showErrorMessage(`Failed to fetch remote skills from ${ownerRepo}. See extension logs.`);
             return [];
+        }
+    }
+
+    /**
+     * Recursively downloads a folder from GitHub.
+     */
+    async downloadFolder(ownerRepo: string, folderPath: string, targetLocalDir: string): Promise<void> {
+        const contents = await this.getRepoContents(ownerRepo, folderPath);
+        
+        if (!fs.existsSync(targetLocalDir)) {
+             fs.mkdirSync(targetLocalDir, { recursive: true });
+        }
+
+        const token = await this.getToken();
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        for (const item of contents) {
+            const itemLocalPath = path.join(targetLocalDir, item.name);
+            
+            if (item.type === 'dir') {
+                 await this.downloadFolder(ownerRepo, item.path, itemLocalPath);
+            } else if (item.type === 'file' && item.download_url) {
+                 try {
+                     const response = await fetch(item.download_url, { headers });
+                     if (!response.ok) {
+                         throw new Error(`Failed to download ${item.download_url}: ${response.statusText}`);
+                     }
+                     const arrayBuffer = await response.arrayBuffer();
+                     const buffer = Buffer.from(arrayBuffer);
+                     fs.writeFileSync(itemLocalPath, buffer);
+                 } catch (e: any) {
+                     console.error(`Error downloading file ${item.name}:`, e);
+                     vscode.window.showErrorMessage(`Failed to download file ${item.name}: ${e.message}`);
+                 }
+            }
         }
     }
 }
