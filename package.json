@@ -52,6 +52,10 @@
       {
         "command": "antigravity.openSkillFile",
         "title": "Open Skill File"
+      },
+      {
+        "command": "antigravity.githubLogin",
+        "title": "Antigravity: Login to GitHub"
       }
     ]
   },

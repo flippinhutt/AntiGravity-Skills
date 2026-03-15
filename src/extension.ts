@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { LocalSkillProvider } from './providers/LocalSkillProvider';
 import { RemoteSkillProvider } from './providers/RemoteSkillProvider';
+import { GitHubService } from './services/GitHubService';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
@@ -26,6 +27,14 @@ export function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand('antigravity.refreshRemoteSkills', () => {
             remoteSkillProvider.refresh();
+        }),
+        vscode.commands.registerCommand('antigravity.githubLogin', async () => {
+            const githubService = new GitHubService();
+            const token = await githubService.getToken(true);
+            if (token) {
+                 vscode.window.showInformationMessage('Successfully authenticated with GitHub.');
+                 remoteSkillProvider.refresh();
+            }
         })
     );
 
