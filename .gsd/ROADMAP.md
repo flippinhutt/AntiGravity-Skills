@@ -17,7 +17,7 @@
 **Requirements**: REQ-01, REQ-07
 
 ### Phase 2: Remote Discovery & Management
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement GitHub API integration to browse remote skills and allow users to manage their repo list.
 **Requirements**: REQ-02, REQ-06
 
