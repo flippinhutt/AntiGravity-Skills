@@ -18,6 +18,7 @@ node_modules/
 .env
 .gsd/
 .gemini/
+.vscode/
 tmp/
 
 # Logs
