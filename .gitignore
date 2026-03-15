@@ -14,8 +14,10 @@ node_modules/
 !.vscode/tasks.json
 
 # Environment and Local Data
+.agent/*
 .env
-.gemini/antigravity/skills/
+.gsd/*
+.gemini/*
 tmp/
 
 # Logs
