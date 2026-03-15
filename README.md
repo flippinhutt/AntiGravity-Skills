@@ -2,7 +2,7 @@
 
 Manage and build Antigravity skills directly in Visual Studio Code.
 
-![Antigravity Icon](https://raw.githubusercontent.com/ryanhutto/antigravity-skill-manager/main/resources/icon.png)
+![Antigravity Icon](https://github.com/flippinhutt/AntiGravity-Skills/blob/main/icon.png)
 
 ## Overview
 
