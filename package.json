@@ -33,6 +33,13 @@
       ]
     },
     "menus": {
+      "view/title": [
+        {
+          "command": "antigravity.createSkill",
+          "when": "view == antigravity.localSkills",
+          "group": "navigation"
+        }
+      ],
       "view/item/context": [
         {
           "command": "antigravity.installSkill",
@@ -70,6 +77,11 @@
         "command": "antigravity.installSkill",
         "title": "Install Skill",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "antigravity.createSkill",
+        "title": "Create New Skill",
+        "icon": "$(add)"
       }
     ]
   },

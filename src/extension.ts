@@ -6,6 +6,7 @@ import { LocalSkillProvider } from './providers/LocalSkillProvider';
 import { RemoteSkillProvider } from './providers/RemoteSkillProvider';
 import { GitHubService } from './services/GitHubService';
 import { SkillItem } from './models/SkillItem';
+import { TemplateService, TemplateType } from './services/TemplateService';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
@@ -75,6 +76,59 @@ export function activate(context: vscode.ExtensionContext) {
                      vscode.window.showErrorMessage(`Failed to install ${item.label}: ${err.message}`);
                  }
              });
+        }),
+        vscode.commands.registerCommand('antigravity.createSkill', async () => {
+             const workspaceFolders = vscode.workspace.workspaceFolders;
+             if (!workspaceFolders || workspaceFolders.length === 0) {
+                 vscode.window.showErrorMessage('Please open a workspace to create a new skill.');
+                 return;
+             }
+
+             const skillName = await vscode.window.showInputBox({
+                 prompt: 'Enter the new skill name (no spaces, e.g., my-awesome-skill)',
+                 validateInput: text => {
+                     return !text || text.includes(' ') ? 'Name cannot be empty or contain spaces' : null;
+                 }
+             });
+
+             if (!skillName) { return; }
+
+             const targetDir = path.join(workspaceFolders[0].uri.fsPath, '.gemini', 'antigravity', 'skills', skillName);
+
+             if (fs.existsSync(targetDir)) {
+                 vscode.window.showErrorMessage(`Skill directory already exists: ${skillName}`);
+                 return;
+             }
+
+             const templateService = new TemplateService();
+             const templates = templateService.getTemplates(skillName);
+             const templateOptions = templates.map(t => ({
+                 label: t.name,
+                 description: t.description
+             }));
+
+             const selected = await vscode.window.showQuickPick(templateOptions, {
+                 placeHolder: 'Select a structural template for the new skill'
+             });
+
+             if (!selected) { return; }
+
+             try {
+                 await templateService.generateTemplate(skillName, selected.label as TemplateType, targetDir);
+                 vscode.window.showInformationMessage(`Successfully created skill: ${skillName}`);
+                 
+                 // Refresh view
+                 vscode.commands.executeCommand('antigravity.refreshLocalSkills');
+
+                 // Open the new SKILL.md
+                 const skillMdPath = path.join(targetDir, 'SKILL.md');
+                 if (fs.existsSync(skillMdPath)) {
+                     const doc = await vscode.workspace.openTextDocument(skillMdPath);
+                     vscode.window.showTextDocument(doc);
+                 }
+             } catch (err: any) {
+                 vscode.window.showErrorMessage(`Failed to create skill: ${err.message}`);
+             }
         })
     );
 
