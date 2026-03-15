@@ -12,7 +12,7 @@
 ## Phases
 
 ### Phase 1: Foundation & Sidebar UI
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Set up extension boilerplate and implement the basic Sidebar UI with local skill detection.
 **Requirements**: REQ-01, REQ-07
 
