@@ -8,15 +8,41 @@
     "vscode": "^1.85.0"
   },
   "main": "./dist/extension.js",
-  "contributes": {},
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "antigravity",
+          "title": "Antigravity",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "antigravity": [
+        {
+          "id": "antigravity.localSkills",
+          "name": "Local Skills",
+          "icon": "$(list-flat)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "antigravity.openSkillFile",
+        "title": "Open Skill File"
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "node ./esbuild.js --production",
     "watch": "node ./esbuild.js --watch"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
-    "esbuild": "^1.0.0",
+    "esbuild": "^0.20.0",
     "typescript": "^5.0.0"
   }
 }
