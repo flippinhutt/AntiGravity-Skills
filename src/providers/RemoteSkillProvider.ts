@@ -22,22 +22,22 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
 
   async getChildren(element?: SkillItem): Promise<SkillItem[]> {
     if (element) {
-        // Assume `element` is a repository item, passing its `label` format: owner/repo
-        const repoStr = element.label;
-        const contents = await this.githubService.getRepoContents(repoStr);
+        const repoStr = element.githubOwnerRepo || element.fullPath.replace('github:', '');
+        const subPath = element.githubPath || '';
+        const contents = await this.githubService.getRepoContents(repoStr, subPath);
         
         return contents.map(item => {
            const skillItem = new SkillItem(
               item.name,
               item.type === 'dir' ? '(Directory)' : undefined,
-              item.html_url, // For remote, the payload might be the URL rather than local path
+              item.html_url,
               item.type === 'dir' ? 'skill' : 'file',
               item.type === 'dir' ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
            );
            skillItem.contextValue = item.type === 'dir' ? 'skill' : 'file';
-           // store ownerRepo and internal path loosely for the install command
-           (skillItem as any).githubOwnerRepo = repoStr;
-           (skillItem as any).githubPath = item.path;
+           skillItem.githubOwnerRepo = repoStr;
+           skillItem.githubPath = item.path;
+           skillItem.downloadUrl = item.download_url || undefined;
            return skillItem;
         }).sort((a,b) => {
            if(a.itemType === 'skill' && b.itemType === 'file') return -1;
@@ -54,13 +54,16 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
     const repos = config.get<string[]>('skillRepositories', []);
     
     return repos.map(repo => {
-        return new SkillItem(
+        const item = new SkillItem(
             repo,
             '(GitHub)',
             `github:${repo}`,
             'skill',
             vscode.TreeItemCollapsibleState.Collapsed
         );
+        item.contextValue = 'repo';
+        item.githubOwnerRepo = repo;
+        return item;
     });
   }
 }

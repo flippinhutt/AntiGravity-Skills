@@ -4,11 +4,16 @@
   "description": "Manage and build Antigravity skills directly in VSCode",
   "version": "1.0.0",
   "publisher": "ryanhutto",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ryanhutto/antigravity-skill-manager"
+  },
+  "categories": ["Other"],
   "engines": {
     "vscode": "^1.85.0"
   },
   "main": "./dist/extension.js",
-  "activationEvents": ["*"],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -39,12 +44,22 @@
           "command": "antigravity.createSkill",
           "when": "view == antigravity.localSkills",
           "group": "navigation"
+        },
+        {
+          "command": "antigravity.addRemoteRepo",
+          "when": "view == antigravity.remoteSkills",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
         {
           "command": "antigravity.installSkill",
           "when": "view == antigravity.remoteSkills && viewItem == skill",
+          "group": "inline"
+        },
+        {
+          "command": "antigravity.removeRemoteRepo",
+          "when": "view == antigravity.remoteSkills && viewItem == repo",
           "group": "inline"
         }
       ]
@@ -87,6 +102,16 @@
       {
         "command": "antigravity.showInvalidSkillError",
         "title": "Show Invalid Skill Error"
+      },
+      {
+        "command": "antigravity.addRemoteRepo",
+        "title": "Add Remote Repository",
+        "icon": "$(add)"
+      },
+      {
+        "command": "antigravity.removeRemoteRepo",
+        "title": "Remove Repository",
+        "icon": "$(trash)"
       }
     ]
   },
