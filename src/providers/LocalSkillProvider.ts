@@ -56,13 +56,29 @@ export class LocalSkillProvider implements vscode.TreeDataProvider<SkillItem> {
       for (const entry of entries) {
           if (entry.isDirectory()) {
               const fullPath = path.join(skillsPath, entry.name);
-              skills.push(new SkillItem(
+              const hasSkillMd = fs.existsSync(path.join(fullPath, 'SKILL.md'));
+
+              const item = new SkillItem(
                   entry.name,
-                  description,
+                  hasSkillMd ? description : 'Invalid Skill (Missing SKILL.md)',
                   fullPath,
                   'skill',
-                  vscode.TreeItemCollapsibleState.Collapsed
-              ));
+                  hasSkillMd ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
+              );
+
+              if (!hasSkillMd) {
+                  item.iconPath = new vscode.ThemeIcon('error');
+                  item.contextValue = 'invalid-skill';
+                  item.command = {
+                      title: 'Show Error',
+                      command: 'antigravity.showInvalidSkillError',
+                      arguments: [entry.name],
+                  };
+              } else {
+                  item.contextValue = 'skill';
+              }
+
+              skills.push(item);
           }
       }
       return skills;

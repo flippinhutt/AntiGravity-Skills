@@ -137,6 +137,12 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('antigravity.openSkillFile', async (filePath: string) => {
             const document = await vscode.workspace.openTextDocument(filePath);
             vscode.window.showTextDocument(document);
+        }),
+        vscode.commands.registerCommand('antigravity.showInvalidSkillError', (skillName: string) => {
+            vscode.window.showErrorMessage(
+                `The folder "${skillName}" does not contain a SKILL.md file. ` +
+                `Create one or use the "Create New Skill" command to scaffold a valid skill.`
+            );
         })
     );
 }

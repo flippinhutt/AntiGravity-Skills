@@ -8,6 +8,7 @@
     "vscode": "^1.85.0"
   },
   "main": "./dist/extension.js",
+  "activationEvents": ["*"],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -82,6 +83,10 @@
         "command": "antigravity.createSkill",
         "title": "Create New Skill",
         "icon": "$(add)"
+      },
+      {
+        "command": "antigravity.showInvalidSkillError",
+        "title": "Show Invalid Skill Error"
       }
     ]
   },
