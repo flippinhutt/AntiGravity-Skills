@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { LocalSkillProvider } from './providers/LocalSkillProvider';
+import { RemoteSkillProvider } from './providers/RemoteSkillProvider';
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
@@ -12,10 +13,19 @@ export function activate(context: vscode.ExtensionContext) {
         localSkillProvider
     );
 
-    // Register a command to refresh the tree view
+    const remoteSkillProvider = new RemoteSkillProvider();
+    vscode.window.registerTreeDataProvider(
+        'antigravity.remoteSkills',
+        remoteSkillProvider
+    );
+
+    // Register a command to refresh the tree views
     context.subscriptions.push(
         vscode.commands.registerCommand('antigravity.refreshLocalSkills', () => {
             localSkillProvider.refresh();
+        }),
+        vscode.commands.registerCommand('antigravity.refreshRemoteSkills', () => {
+            remoteSkillProvider.refresh();
         })
     );
 

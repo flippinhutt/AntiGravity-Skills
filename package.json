@@ -24,8 +24,29 @@
           "id": "antigravity.localSkills",
           "name": "Local Skills",
           "icon": "$(list-flat)"
+        },
+        {
+          "id": "antigravity.remoteSkills",
+          "name": "Remote Skills",
+          "icon": "$(globe)"
         }
       ]
+    },
+    "configuration": {
+      "title": "Antigravity Skill Manager",
+      "properties": {
+        "antigravity.skillRepositories": {
+          "type": "array",
+          "default": [
+            "rominirani/antigravity-skills",
+            "sickn33/antigravity-awesome-skills"
+          ],
+          "description": "List of GitHub repositories (format: owner/repo) to search for Antigravity skills.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     },
     "commands": [
       {
