@@ -1,0 +1,28 @@
+# Build and distribution
+dist/
+out/
+*.vsix
+
+# Dependencies
+node_modules/
+
+# IDE - VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# Environment and Local Data
+.env
+.gemini/antigravity/skills/
+tmp/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
