@@ -19,5 +19,8 @@ tmp/**
 *.vsix
 out/**
 
+# Publish tooling
+publish.sh
+
 # Documentation source (optional, but package.json handles README/LICENSE)
 # .gh-pages/**
