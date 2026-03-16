@@ -13,3 +13,14 @@ All notable changes to the "antigravity-skill-manager" extension will be documen
 - Skill scaffolding from structural templates.
 - Management UI for adding/removing remote GitHub repositories.
 - Customizable global skills path and invalid skill hiding.
+
+## [1.0.2] - 2026-03-16
+
+### Added
+- Updated icon to use the official Antigravity logo
+
+## [1.0.3] - 2026-03-16
+
+### Changed
+- Updated publisher to flippinhutt
+- Updated repository URL to https://github.com/flippinhutt/AntiGravity-Skills

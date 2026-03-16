@@ -2,13 +2,13 @@
   "name": "antigravity-skill-manager",
   "displayName": "Antigravity Skill Manager",
   "description": "Manage and build Antigravity skills directly in VSCode",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "icon": "icon.png",
-  "publisher": "ryanhutto",
+  "publisher": "flippinhutt",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ryanhutto/antigravity-skill-manager"
+    "url": "https://github.com/flippinhutt/AntiGravity-Skills"
   },
   "categories": ["Other"],
   "engines": {
