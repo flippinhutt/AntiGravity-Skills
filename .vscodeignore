@@ -18,6 +18,8 @@ node_modules/**
 tmp/**
 *.vsix
 out/**
+.env
+.env.schema
 
 # Publish tooling
 publish.sh
