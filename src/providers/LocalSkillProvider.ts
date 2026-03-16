@@ -7,9 +7,15 @@ import { SkillItem } from '../models/SkillItem';
 export class LocalSkillProvider implements vscode.TreeDataProvider<SkillItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<SkillItem | undefined | void> = new vscode.EventEmitter<SkillItem | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<SkillItem | undefined | void> = this._onDidChangeTreeData.event;
+  private searchQuery: string = '';
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
+  }
+
+  setFilter(query: string): void {
+      this.searchQuery = query.toLowerCase();
+      this.refresh();
   }
 
   getTreeItem(element: SkillItem): vscode.TreeItem {
@@ -52,6 +58,12 @@ export class LocalSkillProvider implements vscode.TreeDataProvider<SkillItem> {
                  skills.push(...this.readSkillDirectories(localPath, '(Workspace)'));
             }
         }
+    }
+
+    if (this.searchQuery) {
+        return skills
+            .filter(s => s.label.toLowerCase().includes(this.searchQuery))
+            .sort((a, b) => a.label.localeCompare(b.label));
     }
 
     return skills.sort((a, b) => a.label.localeCompare(b.label));

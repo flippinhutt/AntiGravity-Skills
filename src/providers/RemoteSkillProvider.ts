@@ -5,6 +5,7 @@ import { GitHubService } from '../services/GitHubService';
 export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<SkillItem | undefined | void> = new vscode.EventEmitter<SkillItem | undefined | void>();
   readonly onDidChangeTreeData: vscode.Event<SkillItem | undefined | void> = this._onDidChangeTreeData.event;
+  private searchQuery: string = '';
   
   private githubService: GitHubService;
 
@@ -14,6 +15,11 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
+  }
+
+  setFilter(query: string): void {
+      this.searchQuery = query.toLowerCase();
+      this.refresh();
   }
 
   getTreeItem(element: SkillItem): vscode.TreeItem {
@@ -53,7 +59,7 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
     const config = vscode.workspace.getConfiguration('antigravity');
     const repos = config.get<string[]>('skillRepositories', []);
     
-    return repos.map(repo => {
+    let items = repos.map(repo => {
         const item = new SkillItem(
             repo,
             '(GitHub)',
@@ -65,5 +71,11 @@ export class RemoteSkillProvider implements vscode.TreeDataProvider<SkillItem> {
         item.githubOwnerRepo = repo;
         return item;
     });
+
+    if (this.searchQuery) {
+        items = items.filter(i => i.label.toLowerCase().includes(this.searchQuery));
+    }
+
+    return items;
   }
 }

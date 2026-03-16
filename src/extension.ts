@@ -203,8 +203,28 @@ export function activate(context: vscode.ExtensionContext) {
              if (index > -1) {
                  repos.splice(index, 1);
                  await config.update('skillRepositories', repos, vscode.ConfigurationTarget.Global);
-                 remoteSkillProvider.refresh();
+                  remoteSkillProvider.refresh();
                  vscode.window.showInformationMessage(`Removed repository: ${repoToRemove}`);
+             }
+        }),
+        vscode.commands.registerCommand('antigravity.filterLocalSkills', async () => {
+             const query = await vscode.window.showInputBox({
+                 prompt: 'Filter local skills by name',
+                 placeHolder: 'Enter search text (leave empty to clear)',
+             });
+             
+             if (query !== undefined) {
+                 localSkillProvider.setFilter(query);
+             }
+        }),
+        vscode.commands.registerCommand('antigravity.filterRemoteSkills', async () => {
+             const query = await vscode.window.showInputBox({
+                 prompt: 'Filter remote repositories by name',
+                 placeHolder: 'Enter search text (leave empty to clear)',
+             });
+             
+             if (query !== undefined) {
+                 remoteSkillProvider.setFilter(query);
              }
         })
     );

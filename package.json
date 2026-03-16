@@ -2,7 +2,7 @@
   "name": "antigravity-skill-manager",
   "displayName": "Antigravity Skill Manager",
   "description": "Manage and build Antigravity skills directly in VSCode",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "icon": "icon.png",
   "publisher": "ryanhutto",
   "license": "MIT",
@@ -47,7 +47,17 @@
           "group": "navigation"
         },
         {
+          "command": "antigravity.filterLocalSkills",
+          "when": "view == antigravity.localSkills",
+          "group": "navigation"
+        },
+        {
           "command": "antigravity.addRemoteRepo",
+          "when": "view == antigravity.remoteSkills",
+          "group": "navigation"
+        },
+        {
+          "command": "antigravity.filterRemoteSkills",
           "when": "view == antigravity.remoteSkills",
           "group": "navigation"
         }
@@ -123,6 +133,16 @@
         "command": "antigravity.removeRemoteRepo",
         "title": "Remove Repository",
         "icon": "$(trash)"
+      },
+      {
+        "command": "antigravity.filterLocalSkills",
+        "title": "Filter Local Skills",
+        "icon": "$(search)"
+      },
+      {
+        "command": "antigravity.filterRemoteSkills",
+        "title": "Filter Remote Repos",
+        "icon": "$(search)"
       }
     ]
   },
