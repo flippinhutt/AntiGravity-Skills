@@ -4,7 +4,7 @@
   "description": "Manage and build Antigravity skills directly in VSCode",
   "version": "1.0.3",
   "icon": "icon.png",
-  "publisher": "flippinhutt",
+  "publisher": "ryanhutto",
   "license": "MIT",
   "repository": {
     "type": "git",

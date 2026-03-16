@@ -22,5 +22,4 @@ All notable changes to the "antigravity-skill-manager" extension will be documen
 ## [1.0.3] - 2026-03-16
 
 ### Changed
-- Updated publisher to flippinhutt
 - Updated repository URL to https://github.com/flippinhutt/AntiGravity-Skills
