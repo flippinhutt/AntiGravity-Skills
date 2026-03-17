@@ -2,8 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { LocalSkillProvider } from './providers/LocalSkillProvider';
-import { RemoteSkillProvider } from './providers/RemoteSkillProvider';
+import { SkillsWebviewProvider } from './providers/SkillsWebviewProvider';
 import { GitHubService } from './services/GitHubService';
 import { SkillItem } from './models/SkillItem';
 import { TemplateService, TemplateType } from './services/TemplateService';
@@ -11,18 +10,16 @@ import { TemplateService, TemplateType } from './services/TemplateService';
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
 
-    const localSkillProvider = new LocalSkillProvider();
-    
-    // Register the tree data provider
-    vscode.window.registerTreeDataProvider(
-        'antigravity.localSkills',
-        localSkillProvider
+    const githubService = new GitHubService(context.globalState);
+
+    const localProvider = new SkillsWebviewProvider(context.extensionUri, 'local', githubService);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider('antigravity.localSkills', localProvider)
     );
 
-    const remoteSkillProvider = new RemoteSkillProvider();
-    vscode.window.registerTreeDataProvider(
-        'antigravity.remoteSkills',
-        remoteSkillProvider
+    const remoteProvider = new SkillsWebviewProvider(context.extensionUri, 'remote', githubService);
+    context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider('antigravity.remoteSkills', remoteProvider)
     );
 
     // Register a TextDocumentContentProvider for reading remote files
@@ -46,17 +43,16 @@ export function activate(context: vscode.ExtensionContext) {
     // Register a command to refresh the tree views
     context.subscriptions.push(
         vscode.commands.registerCommand('antigravity.refreshLocalSkills', () => {
-            localSkillProvider.refresh();
+            localProvider.refresh();
         }),
         vscode.commands.registerCommand('antigravity.refreshRemoteSkills', () => {
-            remoteSkillProvider.refresh();
+            remoteProvider.refresh();
         }),
         vscode.commands.registerCommand('antigravity.githubLogin', async () => {
-            const githubService = new GitHubService();
             const token = await githubService.getToken(true);
             if (token) {
                  vscode.window.showInformationMessage('Successfully authenticated with GitHub.');
-                 remoteSkillProvider.refresh();
+                 remoteProvider.refresh();
             }
         }),
         vscode.commands.registerCommand('antigravity.installSkill', async (item: SkillItem) => {
@@ -85,7 +81,6 @@ export function activate(context: vscode.ExtensionContext) {
                  cancellable: false
              }, async (progress) => {
                  try {
-                     const githubService = new GitHubService();
                      await githubService.downloadFolder(item.githubOwnerRepo!, item.githubPath!, targetDir);
                      vscode.commands.executeCommand('antigravity.refreshLocalSkills');
                      vscode.window.showInformationMessage(`Successfully installed ${item.label}!`);
@@ -189,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
 
              repos.push(repoFullName);
              await config.update('skillRepositories', repos, vscode.ConfigurationTarget.Global);
-             remoteSkillProvider.refresh();
+             remoteProvider.refresh();
              vscode.window.showInformationMessage(`Added remote repository: ${repoFullName}`);
         }),
         vscode.commands.registerCommand('antigravity.removeRemoteRepo', async (item: SkillItem) => {
@@ -203,28 +198,8 @@ export function activate(context: vscode.ExtensionContext) {
              if (index > -1) {
                  repos.splice(index, 1);
                  await config.update('skillRepositories', repos, vscode.ConfigurationTarget.Global);
-                  remoteSkillProvider.refresh();
+                 remoteProvider.refresh();
                  vscode.window.showInformationMessage(`Removed repository: ${repoToRemove}`);
-             }
-        }),
-        vscode.commands.registerCommand('antigravity.filterLocalSkills', async () => {
-             const query = await vscode.window.showInputBox({
-                 prompt: 'Filter local skills by name',
-                 placeHolder: 'Enter search text (leave empty to clear)',
-             });
-             
-             if (query !== undefined) {
-                 localSkillProvider.setFilter(query);
-             }
-        }),
-        vscode.commands.registerCommand('antigravity.filterRemoteSkills', async () => {
-             const query = await vscode.window.showInputBox({
-                 prompt: 'Filter remote repositories by name',
-                 placeHolder: 'Enter search text (leave empty to clear)',
-             });
-             
-             if (query !== undefined) {
-                 remoteSkillProvider.setFilter(query);
              }
         })
     );

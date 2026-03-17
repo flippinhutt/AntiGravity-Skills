@@ -1,689 +1,248 @@
-"use strict";
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+"use strict";var F=Object.create;var T=Object.defineProperty;var D=Object.getOwnPropertyDescriptor;var G=Object.getOwnPropertyNames;var H=Object.getPrototypeOf,A=Object.prototype.hasOwnProperty;var O=(c,e)=>{for(var r in e)T(c,r,{get:e[r],enumerable:!0})},R=(c,e,r,o)=>{if(e&&typeof e=="object"||typeof e=="function")for(let a of G(e))!A.call(c,a)&&a!==r&&T(c,a,{get:()=>e[a],enumerable:!(o=D(e,a))||o.enumerable});return c};var g=(c,e,r)=>(r=c!=null?F(H(c)):{},R(e||!c||!c.__esModule?T(r,"default",{value:c,enumerable:!0}):r,c)),W=c=>R(T({},"__esModule",{value:!0}),c);var N={};O(N,{activate:()=>U,deactivate:()=>j});module.exports=W(N);var s=g(require("vscode")),C=g(require("fs")),b=g(require("path")),L=g(require("os"));var p=g(require("vscode")),f=g(require("path")),w=g(require("fs")),M=g(require("os"));var k=g(require("vscode")),h=class extends k.TreeItem{constructor(r,o,a,t,i){super(r,i);this.label=r;this.description=o;this.fullPath=a;this.itemType=t;this.collapsibleState=i;this.tooltip=this.fullPath,this.description=o,t==="file"?(this.iconPath=new k.ThemeIcon("file"),this.command={title:"Open File",command:"antigravity.openSkillFile",arguments:[this.fullPath,this]}):this.iconPath=new k.ThemeIcon("symbol-namespace")}githubOwnerRepo;githubPath;downloadUrl};var S=class{constructor(e,r,o){this._extensionUri=e;this._type=r;this._githubService=o}static viewType="antigravity.skills";_view;_searchQuery="";_localSkills=[];_remoteSkills=[];_currentPath=null;resolveWebviewView(e,r,o){this._view=e,e.webview.options={enableScripts:!0,localResourceRoots:[this._extensionUri]},e.webview.html=this._getHtmlForWebview(e.webview),e.webview.onDidReceiveMessage(async a=>{switch(a.type){case"search":this._searchQuery=a.value.toLowerCase(),this._updateView();break;case"refresh":this.refresh();break;case"openItem":a.item.itemType==="skill"||a.item.description?.includes("(Directory)")?this._drillDown(a.item):p.commands.executeCommand("antigravity.openSkillFile",a.filePath,a.item);break;case"goBack":this._goBack();break;case"installSkill":p.commands.executeCommand("antigravity.installSkill",a.item);break;case"createSkill":p.commands.executeCommand("antigravity.createSkill");break}}),setTimeout(()=>this.refresh(),1e3)}refresh(){this._currentPath=null,this._view&&this._view.webview.postMessage({type:"loading"}),this._type==="local"?this._loadLocalSkills():this._loadRemoteSkills()}_updateView(e=!1){if(this._view){if(e){this._view.webview.postMessage({type:"loading"});return}let o=(this._type==="local"?this._localSkills:this._remoteSkills).filter(a=>a.label.toLowerCase().includes(this._searchQuery));this._view.webview.postMessage({type:"updateItems",items:o,canGoBack:this._currentPath!==null})}}async _drillDown(e){if(this._updateView(!0),this._type==="local")try{let r=w.readdirSync(e.fullPath,{withFileTypes:!0});this._localSkills=r.map(o=>{let a=f.join(e.fullPath,o.name);return new h(o.name,o.isDirectory()?"(Directory)":void 0,a,o.isDirectory()?"skill":"file",o.isDirectory()?p.TreeItemCollapsibleState.Collapsed:p.TreeItemCollapsibleState.None)}),this._currentPath={type:"local",path:e.fullPath}}catch(r){console.error(r)}else{let r=e.githubOwnerRepo,o=e.githubPath||"";try{let a=await this._githubService.getRepoContents(r,o);this._remoteSkills=a.map(t=>{let i=new h(t.name,t.type==="dir"?"(Directory)":void 0,t.html_url,t.type==="dir"?"skill":"file",t.type==="dir"?p.TreeItemCollapsibleState.Collapsed:p.TreeItemCollapsibleState.None);return i.githubOwnerRepo=r,i.githubPath=t.path,i.downloadUrl=t.download_url||void 0,i}),this._currentPath={type:"remote",path:o,repo:r}}catch(a){console.error(a)}}this._updateView()}_goBack(){this.refresh()}_loadLocalSkills(){let e=[],o=p.workspace.getConfiguration("antigravity").get("customGlobalSkillsPath","").trim();if(o?o.startsWith("~")&&(o=f.join(M.homedir(),o.slice(1))):o=f.join(M.homedir(),".gemini","antigravity","skills"),w.existsSync(o)&&e.push(...this._readLocalDir(o,"(Global)")),p.workspace.workspaceFolders)for(let a of p.workspace.workspaceFolders){let t=f.join(a.uri.fsPath,".gemini","antigravity","skills");w.existsSync(t)&&e.push(...this._readLocalDir(t,"(Workspace)"))}this._localSkills=e,this._updateView()}_readLocalDir(e,r){let o=[],t=p.workspace.getConfiguration("antigravity").get("hideInvalidSkills",!1);try{let i=w.readdirSync(e,{withFileTypes:!0});for(let n of i)if(n.isDirectory()){let d=f.join(e,n.name),l=w.existsSync(f.join(d,"SKILL.md"));if(!l&&t)continue;let u=new h(n.name,l?r:"Invalid Skill (Missing SKILL.md)",d,"skill",l?p.TreeItemCollapsibleState.Collapsed:p.TreeItemCollapsibleState.None);o.push(u)}}catch(i){console.error(i)}return o}async _loadRemoteSkills(){let o=p.workspace.getConfiguration("antigravity").get("skillRepositories",[]).map(async t=>{let i=[".gemini/antigravity/skills","skills",""];for(let n of i)try{let d=await this._githubService.getRepoContents(t,n);if(d&&d.length>0){if(n!=="")return d.map(l=>{let u=new h(l.name,l.type==="dir"?`(Skill in ${t})`:void 0,l.html_url,l.type==="dir"?"skill":"file",l.type==="dir"?p.TreeItemCollapsibleState.Collapsed:p.TreeItemCollapsibleState.None);return u.githubOwnerRepo=t,u.githubPath=l.path,u.downloadUrl=l.download_url||void 0,u});if(i.indexOf(n)===i.length-1){let l=new h(t,"(Repo Root)",`github:${t}`,"skill",p.TreeItemCollapsibleState.Collapsed);return l.githubOwnerRepo=t,l.githubPath="",[l]}}}catch{}return[]}),a=await Promise.all(o);this._remoteSkills=a.flat(),this._updateView()}_getHtmlForWebview(e){return`<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Antigravity Skills</title>
+                <style>
+                    :root {
+                        --sidebar-padding: 12px;
+                        --item-height: 28px;
+                    }
+                    body {
+                        padding: 0;
+                        color: var(--vscode-foreground);
+                        font-family: var(--vscode-font-family);
+                        overflow-x: hidden;
+                    }
+                    .header {
+                        display: flex;
+                        flex-direction: column;
+                        position: sticky;
+                        top: 0;
+                        background: var(--vscode-sideBar-background);
+                        z-index: 100;
+                        border-bottom: 1px solid var(--vscode-sideBar-border);
+                    }
+                    .search-container {
+                        padding: 8px var(--sidebar-padding);
+                    }
+                    .search-inner {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                    }
+                    #search {
+                        width: 100%;
+                        padding: 6px 30px 6px 8px;
+                        box-sizing: border-box;
+                        background: var(--vscode-input-background);
+                        color: var(--vscode-input-foreground);
+                        border: 1px solid var(--vscode-input-border);
+                        outline: none;
+                        font-size: 12px;
+                        border-radius: 2px;
+                    }
+                    #search:focus {
+                        border-color: var(--vscode-focusBorder);
+                    }
+                    .search-icon {
+                        position: absolute;
+                        right: 8px;
+                        opacity: 0.5;
+                        font-size: 14px;
+                        cursor: default;
+                    }
+                    .toolbar {
+                        display: flex;
+                        align-items: center;
+                        padding: 0 var(--sidebar-padding) 8px var(--sidebar-padding);
+                        gap: 8px;
+                    }
+                    .tool-button {
+                        cursor: pointer;
+                        opacity: 0.7;
+                        font-size: 12px;
+                        display: flex;
+                        align-items: center;
+                        background: var(--vscode-button-secondaryBackground);
+                        color: var(--vscode-button-secondaryForeground);
+                        padding: 2px 8px;
+                        border-radius: 2px;
+                    }
+                    .tool-button:hover {
+                        opacity: 1;
+                        background: var(--vscode-button-secondaryHoverBackground);
+                    }
+                    .item-list {
+                        list-style: none;
+                        padding: 4px 0;
+                        margin: 0;
+                    }
+                    .item {
+                        padding: 0 var(--sidebar-padding);
+                        height: var(--item-height);
+                        line-height: var(--item-height);
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        border-radius: 0;
+                        font-size: 13px;
+                        user-select: none;
+                    }
+                    .item:hover {
+                        background: var(--vscode-list-hoverBackground);
+                    }
+                    .item:active {
+                        background: var(--vscode-list-activeSelectionBackground);
+                        color: var(--vscode-list-activeSelectionForeground);
+                    }
+                    .item-icon {
+                        margin-right: 6px;
+                        width: 16px;
+                        text-align: center;
+                        font-size: 14px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .item-label {
+                        flex: 1;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .item-description {
+                        font-size: 11px;
+                        opacity: 0.6;
+                        margin-left: 8px;
+                        font-style: italic;
+                    }
+                    .loader {
+                        padding: 20px;
+                        text-align: center;
+                        font-size: 12px;
+                        opacity: 0.7;
+                    }
+                    .no-results {
+                        padding: 20px;
+                        text-align: center;
+                        opacity: 0.5;
+                        font-size: 12px;
+                    }
+                </style>
+			</head>
+			<body>
+				<div class="header">
+                    <div class="search-container">
+                        <div class="search-inner">
+                            <input type="text" id="search" placeholder="Filter skills..." autocomplete="off" />
+                            <span class="search-icon">\u{1F50D}</span>
+                        </div>
+                    </div>
+                    <div id="toolbar" class="toolbar" style="display: none;">
+                        <span id="back-btn" class="tool-button">\u2190 Back</span>
+                    </div>
+				</div>
+				<div id="content">
+                    <div class="loader">Loading skills...</div>
+                </div>
 
-// src/extension.ts
-var extension_exports = {};
-__export(extension_exports, {
-  activate: () => activate,
-  deactivate: () => deactivate
-});
-module.exports = __toCommonJS(extension_exports);
-var vscode5 = __toESM(require("vscode"));
-var fs4 = __toESM(require("fs"));
-var path4 = __toESM(require("path"));
-var os2 = __toESM(require("os"));
+				<script>
+					const vscode = acquireVsCodeApi();
+					const searchInput = document.getElementById('search');
+					const contentDiv = document.getElementById('content');
+                    const toolbar = document.getElementById('toolbar');
+                    const backBtn = document.getElementById('back-btn');
 
-// src/providers/LocalSkillProvider.ts
-var vscode2 = __toESM(require("vscode"));
-var path = __toESM(require("path"));
-var fs = __toESM(require("fs"));
-var os = __toESM(require("os"));
+					searchInput.addEventListener('input', (e) => {
+						vscode.postMessage({ type: 'search', value: e.target.value });
+					});
 
-// src/models/SkillItem.ts
-var vscode = __toESM(require("vscode"));
-var SkillItem = class extends vscode.TreeItem {
-  constructor(label, description, fullPath, itemType, collapsibleState) {
-    super(label, collapsibleState);
-    this.label = label;
-    this.description = description;
-    this.fullPath = fullPath;
-    this.itemType = itemType;
-    this.collapsibleState = collapsibleState;
-    this.tooltip = this.fullPath;
-    this.description = description;
-    if (itemType === "file") {
-      this.iconPath = new vscode.ThemeIcon("file");
-      this.command = {
-        title: "Open File",
-        command: "antigravity.openSkillFile",
-        arguments: [this.fullPath, this]
-      };
-    } else {
-      this.iconPath = new vscode.ThemeIcon("symbol-namespace");
-    }
-  }
-  githubOwnerRepo;
-  githubPath;
-  downloadUrl;
-};
+                    backBtn.addEventListener('click', () => {
+                        vscode.postMessage({ type: 'goBack' });
+                    });
 
-// src/providers/LocalSkillProvider.ts
-var LocalSkillProvider = class {
-  _onDidChangeTreeData = new vscode2.EventEmitter();
-  onDidChangeTreeData = this._onDidChangeTreeData.event;
-  searchQuery = "";
-  refresh() {
-    this._onDidChangeTreeData.fire();
-  }
-  setFilter(query) {
-    this.searchQuery = query.toLowerCase();
-    this.refresh();
-  }
-  getTreeItem(element) {
-    return element;
-  }
-  getChildren(element) {
-    if (element) {
-      if (element.itemType === "skill") {
-        return Promise.resolve(this.getFilesInSkill(element.fullPath));
-      } else {
-        return Promise.resolve([]);
-      }
-    } else {
-      return Promise.resolve(this.getTopLevelSkills());
-    }
-  }
-  getTopLevelSkills() {
-    const skills = [];
-    const config = vscode2.workspace.getConfiguration("antigravity");
-    let globalPath = config.get("customGlobalSkillsPath", "").trim();
-    if (!globalPath) {
-      globalPath = path.join(os.homedir(), ".gemini", "antigravity", "skills");
-    } else if (globalPath.startsWith("~")) {
-      globalPath = path.join(os.homedir(), globalPath.slice(1));
-    }
-    if (this.pathExists(globalPath)) {
-      skills.push(...this.readSkillDirectories(globalPath, "(Global)"));
-    }
-    if (vscode2.workspace.workspaceFolders) {
-      for (const folder of vscode2.workspace.workspaceFolders) {
-        const localPath = path.join(folder.uri.fsPath, ".gemini", "antigravity", "skills");
-        if (this.pathExists(localPath)) {
-          skills.push(...this.readSkillDirectories(localPath, "(Workspace)"));
-        }
-      }
-    }
-    if (this.searchQuery) {
-      return skills.filter((s) => s.label.toLowerCase().includes(this.searchQuery)).sort((a, b) => a.label.localeCompare(b.label));
-    }
-    return skills.sort((a, b) => a.label.localeCompare(b.label));
-  }
-  readSkillDirectories(skillsPath, description) {
-    const skills = [];
-    const config = vscode2.workspace.getConfiguration("antigravity");
-    const hideInvalid = config.get("hideInvalidSkills", false);
-    const entries = fs.readdirSync(skillsPath, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        const fullPath = path.join(skillsPath, entry.name);
-        const hasSkillMd = fs.existsSync(path.join(fullPath, "SKILL.md"));
-        if (!hasSkillMd && hideInvalid) {
-          continue;
-        }
-        const item = new SkillItem(
-          entry.name,
-          hasSkillMd ? description : "Invalid Skill (Missing SKILL.md)",
-          fullPath,
-          "skill",
-          hasSkillMd ? vscode2.TreeItemCollapsibleState.Collapsed : vscode2.TreeItemCollapsibleState.None
-        );
-        if (!hasSkillMd) {
-          item.iconPath = new vscode2.ThemeIcon("error");
-          item.contextValue = "invalid-skill";
-          item.command = {
-            title: "Show Error",
-            command: "antigravity.showInvalidSkillError",
-            arguments: [entry.name]
-          };
-        } else {
-          item.contextValue = "skill";
-        }
-        skills.push(item);
-      }
-    }
-    return skills;
-  }
-  getFilesInSkill(skillPath) {
-    const children = [];
-    const entries = fs.readdirSync(skillPath, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(skillPath, entry.name);
-      if (entry.isFile()) {
-        children.push(new SkillItem(
-          entry.name,
-          void 0,
-          fullPath,
-          "file",
-          vscode2.TreeItemCollapsibleState.None
-        ));
-      } else if (entry.isDirectory()) {
-        children.push(new SkillItem(
-          entry.name,
-          "(Directory)",
-          fullPath,
-          "skill",
-          vscode2.TreeItemCollapsibleState.Collapsed
-        ));
-      }
-    }
-    return children.sort((a, b) => {
-      if (a.itemType === "skill" && b.itemType === "file")
-        return -1;
-      if (a.itemType === "file" && b.itemType === "skill")
-        return 1;
-      return a.label.localeCompare(b.label);
-    });
-  }
-  pathExists(p) {
-    try {
-      fs.accessSync(p);
-    } catch (err) {
-      return false;
-    }
-    return true;
-  }
-};
+					window.addEventListener('message', event => {
+						const message = event.data;
+						switch (message.type) {
+                            case 'loading':
+                                contentDiv.innerHTML = '<div class="loader">Loading...</div>';
+                                break;
+							case 'updateItems':
+								updateItems(message.items, message.canGoBack);
+								break;
+						}
+					});
 
-// src/providers/RemoteSkillProvider.ts
-var vscode4 = __toESM(require("vscode"));
+					function updateItems(items, canGoBack) {
+                        toolbar.style.display = canGoBack ? 'flex' : 'none';
 
-// src/services/GitHubService.ts
-var vscode3 = __toESM(require("vscode"));
-var fs2 = __toESM(require("fs"));
-var path2 = __toESM(require("path"));
-var GitHubService = class _GitHubService {
-  static GITHUB_API_URL = "https://api.github.com";
-  static SESSION_OPTIONS = { createIfNone: false };
-  /**
-   * Gets a GitHub Token from VSCode's built-in authentication provider.
-   */
-  async getToken(createIfNone = false) {
-    try {
-      const session = await vscode3.authentication.getSession("github", ["repo"], { createIfNone });
-      return session?.accessToken;
-    } catch (error) {
-      console.error("Failed to get GitHub session:", error);
-      return void 0;
-    }
-  }
-  /**
-   * Fetches the root contents of a given GitHub repository.
-   * @param ownerRepo String in the format "owner/repo"
-   */
-  async getRepoContents(ownerRepo, path5 = "") {
-    const token = await this.getToken();
-    const url = `${_GitHubService.GITHUB_API_URL}/repos/${ownerRepo}/contents/${path5}`;
-    const headers = {
-      "Accept": "application/vnd.github.v3+json",
-      "User-Agent": "Antigravity-Skill-Manager-VSCode"
-    };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    try {
-      const response = await fetch(url, { headers });
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`GitHub API Error (${response.status}): ${text}`);
-      }
-      const data = await response.json();
-      return Array.isArray(data) ? data : [data];
-    } catch (error) {
-      console.error(`Error fetching contents for ${ownerRepo}:`, error);
-      vscode3.window.showErrorMessage(`Failed to fetch remote skills from ${ownerRepo}. See extension logs.`);
-      return [];
-    }
-  }
-  /**
-   * Recursively downloads a folder from GitHub.
-   */
-  async downloadFolder(ownerRepo, folderPath, targetLocalDir) {
-    const contents = await this.getRepoContents(ownerRepo, folderPath);
-    if (!fs2.existsSync(targetLocalDir)) {
-      fs2.mkdirSync(targetLocalDir, { recursive: true });
-    }
-    const token = await this.getToken();
-    const headers = {};
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-    for (const item of contents) {
-      const itemLocalPath = path2.join(targetLocalDir, item.name);
-      if (item.type === "dir") {
-        await this.downloadFolder(ownerRepo, item.path, itemLocalPath);
-      } else if (item.type === "file" && item.download_url) {
-        try {
-          const response = await fetch(item.download_url, { headers });
-          if (!response.ok) {
-            throw new Error(`Failed to download ${item.download_url}: ${response.statusText}`);
-          }
-          const arrayBuffer = await response.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
-          fs2.writeFileSync(itemLocalPath, buffer);
-        } catch (e) {
-          console.error(`Error downloading file ${item.name}:`, e);
-          vscode3.window.showErrorMessage(`Failed to download file ${item.name}: ${e.message}`);
-        }
-      }
-    }
-  }
-};
+						if (items.length === 0) {
+                            contentDiv.innerHTML = '<div class="no-results">No skills found</div>';
+                            return;
+                        }
 
-// src/providers/RemoteSkillProvider.ts
-var RemoteSkillProvider = class {
-  _onDidChangeTreeData = new vscode4.EventEmitter();
-  onDidChangeTreeData = this._onDidChangeTreeData.event;
-  searchQuery = "";
-  githubService;
-  constructor() {
-    this.githubService = new GitHubService();
-  }
-  refresh() {
-    this._onDidChangeTreeData.fire();
-  }
-  setFilter(query) {
-    this.searchQuery = query.toLowerCase();
-    this.refresh();
-  }
-  getTreeItem(element) {
-    return element;
-  }
-  async getChildren(element) {
-    if (element) {
-      const repoStr = element.githubOwnerRepo || element.fullPath.replace("github:", "");
-      const subPath = element.githubPath || "";
-      const contents = await this.githubService.getRepoContents(repoStr, subPath);
-      return contents.map((item) => {
-        const skillItem = new SkillItem(
-          item.name,
-          item.type === "dir" ? "(Directory)" : void 0,
-          item.html_url,
-          item.type === "dir" ? "skill" : "file",
-          item.type === "dir" ? vscode4.TreeItemCollapsibleState.Collapsed : vscode4.TreeItemCollapsibleState.None
-        );
-        skillItem.contextValue = item.type === "dir" ? "skill" : "file";
-        skillItem.githubOwnerRepo = repoStr;
-        skillItem.githubPath = item.path;
-        skillItem.downloadUrl = item.download_url || void 0;
-        return skillItem;
-      }).sort((a, b) => {
-        if (a.itemType === "skill" && b.itemType === "file")
-          return -1;
-        if (a.itemType === "file" && b.itemType === "skill")
-          return 1;
-        return a.label.localeCompare(b.label);
-      });
-    } else {
-      return Promise.resolve(this.getTopLevelRepositories());
-    }
-  }
-  getTopLevelRepositories() {
-    const config = vscode4.workspace.getConfiguration("antigravity");
-    const repos = config.get("skillRepositories", []);
-    let items = repos.map((repo) => {
-      const item = new SkillItem(
-        repo,
-        "(GitHub)",
-        `github:${repo}`,
-        "skill",
-        vscode4.TreeItemCollapsibleState.Collapsed
-      );
-      item.contextValue = "repo";
-      item.githubOwnerRepo = repo;
-      return item;
-    });
-    if (this.searchQuery) {
-      items = items.filter((i) => i.label.toLowerCase().includes(this.searchQuery));
-    }
-    return items;
-  }
-};
+                        const ul = document.createElement('ul');
+                        ul.className = 'item-list';
+                        
+						items.forEach(item => {
+							const li = document.createElement('li');
+							li.className = 'item';
+                            
+                            let icon = '\u{1F4C4}';
+                            if (item.itemType === 'skill' || item.description?.includes('(Directory)') || item.description?.includes('(Repo Root)')) icon = '\u{1F4C1}';
+                            if (item.label.toLowerCase().includes('skill.md')) icon = '\u{1F6E1}\uFE0F';
 
-// src/services/TemplateService.ts
-var fs3 = __toESM(require("fs"));
-var path3 = __toESM(require("path"));
-var TemplateService = class {
-  getMinimalTemplate(skillName) {
-    return {
-      name: "Minimal",
-      description: "A basic SKILL.md with frontmatter.",
-      files: {
-        "SKILL.md": `---
-name: ${skillName}
+							li.innerHTML = \`
+								<span class="item-icon">\${icon}</span>
+								<span class="item-label">\${item.label}</span>
+								<span class="item-description">\${item.description || ''}</span>
+							\`;
+							li.addEventListener('click', () => {
+								vscode.postMessage({ 
+                                    type: 'openItem',
+                                    filePath: item.fullPath,
+                                    item: item
+                                });
+							});
+							ul.appendChild(li);
+						});
+                        contentDiv.innerHTML = '';
+                        contentDiv.appendChild(ul);
+					}
+				</script>
+			</body>
+			</html>`}};var x=g(require("vscode")),y=g(require("fs")),E=g(require("path")),_=class c{constructor(e){this._storage=e}static GITHUB_API_URL="https://api.github.com";static SESSION_OPTIONS={createIfNone:!1};async getToken(e=!1){try{return(await x.authentication.getSession("github",["repo"],{createIfNone:e}))?.accessToken}catch(r){r?.message?.includes("initialized first")?console.warn("Antigravity services not yet ready:",r.message):console.error("Failed to get GitHub session:",r);return}}async getRepoContents(e,r=""){let o=await this.getToken(),a=`${c.GITHUB_API_URL}/repos/${e}/contents/${r}`,t=`github-cache:${e}:${r}`,i=this._storage?.get(t),n={Accept:"application/vnd.github.v3+json","User-Agent":"Antigravity-Skill-Manager-VSCode"};o&&(n.Authorization=`Bearer ${o}`),i?.etag&&(n["If-None-Match"]=i.etag);try{let d=await fetch(a,{headers:n});if(d.status===304&&i)return console.log(`Cache hit for ${a}`),i.data;if(!d.ok){let $=await d.text();throw new Error(`GitHub API Error (${d.status}): ${$}`)}let l=await d.json(),u=Array.isArray(l)?l:[l],m=d.headers.get("ETag");return m&&this._storage&&await this._storage.update(t,{etag:m,data:u}),u}catch(d){return console.error(`Error fetching contents for ${e}:`,d),i?i.data:(x.window.showErrorMessage(`Failed to fetch remote skills from ${e}. See extension logs.`),[])}}async downloadFolder(e,r,o){let a=await this.getRepoContents(e,r);y.existsSync(o)||y.mkdirSync(o,{recursive:!0});let t=await this.getToken(),i={};t&&(i.Authorization=`Bearer ${t}`);for(let n of a){let d=E.join(o,n.name);if(n.type==="dir")await this.downloadFolder(e,n.path,d);else if(n.type==="file"&&n.download_url)try{let l=await fetch(n.download_url,{headers:i});if(!l.ok)throw new Error(`Failed to download ${n.download_url}: ${l.statusText}`);let u=await l.arrayBuffer(),m=Buffer.from(u);y.writeFileSync(d,m)}catch(l){console.error(`Error downloading file ${n.name}:`,l),x.window.showErrorMessage(`Failed to download file ${n.name}: ${l.message}`)}}}};var v=g(require("fs")),P=g(require("path")),I=class{getMinimalTemplate(e){return{name:"Minimal",description:"A basic SKILL.md with frontmatter.",files:{"SKILL.md":`---
+name: ${e}
 description: Write a description here
 ---
 
 # Instructions
 
 Write your agent instructions here.
-`
-      }
-    };
-  }
-  getScriptBasedTemplate(skillName) {
-    return {
-      name: "Script-based",
-      description: "Includes a SKILL.md and a scripts/ folder.",
-      files: {
-        "SKILL.md": `---
-name: ${skillName}
+`}}}getScriptBasedTemplate(e){return{name:"Script-based",description:"Includes a SKILL.md and a scripts/ folder.",files:{"SKILL.md":`---
+name: ${e}
 description: Write a description here
 ---
 
 # Instructions
 
 When using this skill, you can execute the helper script located in \`scripts/run.sh\`.
-`,
-        "scripts/run.sh": `#!/bin/bash
-echo "Hello from ${skillName}!"
-`
-      }
-    };
-  }
-  getMultiAgentTemplate(skillName) {
-    return {
-      name: "Multi-agent",
-      description: "Scaffolds roles for complex agent interactions.",
-      files: {
-        "SKILL.md": `---
-name: ${skillName}
+`,"scripts/run.sh":`#!/bin/bash
+echo "Hello from ${e}!"
+`}}}getMultiAgentTemplate(e){return{name:"Multi-agent",description:"Scaffolds roles for complex agent interactions.",files:{"SKILL.md":`---
+name: ${e}
 description: Multi-agent coordination skill
 ---
 
 # Instructions
 
 This skill involves multiple agents. See the \`agents/\` folder for specific roles.
-`,
-        "agents/planner.md": `# Planner Agent
+`,"agents/planner.md":`# Planner Agent
 Analyze the user request and break it down into steps.
-`,
-        "agents/executor.md": `# Executor Agent
+`,"agents/executor.md":`# Executor Agent
 Run the steps defined by the Planner.
-`
-      }
-    };
-  }
-  getTemplates(skillName) {
-    return [
-      this.getMinimalTemplate(skillName),
-      this.getScriptBasedTemplate(skillName),
-      this.getMultiAgentTemplate(skillName)
-    ];
-  }
-  async generateTemplate(skillName, templateName, targetDir) {
-    const templates = this.getTemplates(skillName);
-    const template = templates.find((t) => t.name === templateName);
-    if (!template) {
-      throw new Error(`Template "${templateName}" not found.`);
-    }
-    if (!fs3.existsSync(targetDir)) {
-      fs3.mkdirSync(targetDir, { recursive: true });
-    }
-    for (const [relativePath, content] of Object.entries(template.files)) {
-      const absolutePath = path3.join(targetDir, relativePath);
-      const dirName = path3.dirname(absolutePath);
-      if (!fs3.existsSync(dirName)) {
-        fs3.mkdirSync(dirName, { recursive: true });
-      }
-      fs3.writeFileSync(absolutePath, content);
-    }
-  }
-};
+`}}}getTemplates(e){return[this.getMinimalTemplate(e),this.getScriptBasedTemplate(e),this.getMultiAgentTemplate(e)]}async generateTemplate(e,r,o){let t=this.getTemplates(e).find(i=>i.name===r);if(!t)throw new Error(`Template "${r}" not found.`);v.existsSync(o)||v.mkdirSync(o,{recursive:!0});for(let[i,n]of Object.entries(t.files)){let d=P.join(o,i),l=P.dirname(d);v.existsSync(l)||v.mkdirSync(l,{recursive:!0}),v.writeFileSync(d,n)}}};function U(c){console.log("Antigravity Skill Manager is now active!");let e=new _(c.globalState),r=new S(c.extensionUri,"local",e);c.subscriptions.push(s.window.registerWebviewViewProvider("antigravity.localSkills",r));let o=new S(c.extensionUri,"remote",e);c.subscriptions.push(s.window.registerWebviewViewProvider("antigravity.remoteSkills",o));let a=new class{async provideTextDocumentContent(t){try{let i=await fetch(t.query);if(!i.ok)throw new Error(`HTTP ${i.status}: ${i.statusText}`);return await i.text()}catch(i){return`Failed to fetch remote file content:
 
-// src/extension.ts
-function activate(context) {
-  console.log("Antigravity Skill Manager is now active!");
-  const localSkillProvider = new LocalSkillProvider();
-  vscode5.window.registerTreeDataProvider(
-    "antigravity.localSkills",
-    localSkillProvider
-  );
-  const remoteSkillProvider = new RemoteSkillProvider();
-  vscode5.window.registerTreeDataProvider(
-    "antigravity.remoteSkills",
-    remoteSkillProvider
-  );
-  const remoteContentProvider = new class {
-    async provideTextDocumentContent(uri) {
-      try {
-        const response = await fetch(uri.query);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        return await response.text();
-      } catch (err) {
-        return `Failed to fetch remote file content:
-
-${err.message}`;
-      }
-    }
-  }();
-  context.subscriptions.push(
-    vscode5.workspace.registerTextDocumentContentProvider("antigravity-remote", remoteContentProvider)
-  );
-  context.subscriptions.push(
-    vscode5.commands.registerCommand("antigravity.refreshLocalSkills", () => {
-      localSkillProvider.refresh();
-    }),
-    vscode5.commands.registerCommand("antigravity.refreshRemoteSkills", () => {
-      remoteSkillProvider.refresh();
-    }),
-    vscode5.commands.registerCommand("antigravity.githubLogin", async () => {
-      const githubService = new GitHubService();
-      const token = await githubService.getToken(true);
-      if (token) {
-        vscode5.window.showInformationMessage("Successfully authenticated with GitHub.");
-        remoteSkillProvider.refresh();
-      }
-    }),
-    vscode5.commands.registerCommand("antigravity.installSkill", async (item) => {
-      if (!item.githubOwnerRepo || !item.githubPath) {
-        vscode5.window.showErrorMessage("Cannot install skill: Missing GitHub metadata on tree item.");
-        return;
-      }
-      const targetDir = await promptForSkillTarget(item.label);
-      if (!targetDir) {
-        return;
-      }
-      if (fs4.existsSync(targetDir)) {
-        const answer = await vscode5.window.showWarningMessage(
-          `A skill named "${item.label}" already exists there. Overwrite?`,
-          { modal: true },
-          "Overwrite"
-        );
-        if (answer !== "Overwrite") {
-          return;
-        }
-      }
-      vscode5.window.withProgress({
-        location: vscode5.ProgressLocation.Notification,
-        title: `Installing ${item.label}...`,
-        cancellable: false
-      }, async (progress) => {
-        try {
-          const githubService = new GitHubService();
-          await githubService.downloadFolder(item.githubOwnerRepo, item.githubPath, targetDir);
-          vscode5.commands.executeCommand("antigravity.refreshLocalSkills");
-          vscode5.window.showInformationMessage(`Successfully installed ${item.label}!`);
-        } catch (err) {
-          vscode5.window.showErrorMessage(`Failed to install ${item.label}: ${err.message}`);
-        }
-      });
-    }),
-    vscode5.commands.registerCommand("antigravity.createSkill", async () => {
-      const skillName = await vscode5.window.showInputBox({
-        prompt: "Enter the new skill name (no spaces, e.g., my-awesome-skill)",
-        validateInput: (text) => {
-          return !text || text.includes(" ") ? "Name cannot be empty or contain spaces" : null;
-        }
-      });
-      if (!skillName) {
-        return;
-      }
-      const targetDir = await promptForSkillTarget(skillName);
-      if (!targetDir) {
-        return;
-      }
-      if (fs4.existsSync(targetDir)) {
-        vscode5.window.showErrorMessage(`Skill directory already exists: ${skillName}`);
-        return;
-      }
-      const templateService = new TemplateService();
-      const templates = templateService.getTemplates(skillName);
-      const templateOptions = templates.map((t) => ({
-        label: t.name,
-        description: t.description
-      }));
-      const selected = await vscode5.window.showQuickPick(templateOptions, {
-        placeHolder: "Select a structural template for the new skill"
-      });
-      if (!selected) {
-        return;
-      }
-      try {
-        await templateService.generateTemplate(skillName, selected.label, targetDir);
-        vscode5.window.showInformationMessage(`Successfully created skill: ${skillName}`);
-        vscode5.commands.executeCommand("antigravity.refreshLocalSkills");
-        const skillMdPath = path4.join(targetDir, "SKILL.md");
-        if (fs4.existsSync(skillMdPath)) {
-          const doc = await vscode5.workspace.openTextDocument(skillMdPath);
-          vscode5.window.showTextDocument(doc);
-        }
-      } catch (err) {
-        vscode5.window.showErrorMessage(`Failed to create skill: ${err.message}`);
-      }
-    })
-  );
-  context.subscriptions.push(
-    vscode5.commands.registerCommand("antigravity.openSkillFile", async (filePath, item) => {
-      if (item && item.downloadUrl) {
-        const uri = vscode5.Uri.parse(`antigravity-remote:${item.label}?${item.downloadUrl}`);
-        const document = await vscode5.workspace.openTextDocument(uri);
-        vscode5.window.showTextDocument(document, { preview: true });
-      } else if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
-        vscode5.env.openExternal(vscode5.Uri.parse(filePath));
-      } else {
-        const document = await vscode5.workspace.openTextDocument(filePath);
-        vscode5.window.showTextDocument(document);
-      }
-    }),
-    vscode5.commands.registerCommand("antigravity.showInvalidSkillError", (skillName) => {
-      vscode5.window.showErrorMessage(
-        `The folder "${skillName}" does not contain a SKILL.md file. Create one or use the "Create New Skill" command to scaffold a valid skill.`
-      );
-    }),
-    vscode5.commands.registerCommand("antigravity.addRemoteRepo", async () => {
-      const repoFullName = await vscode5.window.showInputBox({
-        prompt: "Enter the GitHub repository (format: owner/repo)",
-        placeHolder: "e.g., rominirani/antigravity-skills",
-        validateInput: (text) => {
-          const regex = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
-          return regex.test(text || "") ? null : "Invalid format. Must be owner/repo.";
-        }
-      });
-      if (!repoFullName) {
-        return;
-      }
-      const config = vscode5.workspace.getConfiguration("antigravity");
-      const repos = config.get("skillRepositories", []);
-      if (repos.includes(repoFullName)) {
-        vscode5.window.showInformationMessage(`Repository ${repoFullName} is already in your list.`);
-        return;
-      }
-      repos.push(repoFullName);
-      await config.update("skillRepositories", repos, vscode5.ConfigurationTarget.Global);
-      remoteSkillProvider.refresh();
-      vscode5.window.showInformationMessage(`Added remote repository: ${repoFullName}`);
-    }),
-    vscode5.commands.registerCommand("antigravity.removeRemoteRepo", async (item) => {
-      if (!item.githubOwnerRepo) {
-        return;
-      }
-      const repoToRemove = item.githubOwnerRepo;
-      const config = vscode5.workspace.getConfiguration("antigravity");
-      const repos = config.get("skillRepositories", []);
-      const index = repos.indexOf(repoToRemove);
-      if (index > -1) {
-        repos.splice(index, 1);
-        await config.update("skillRepositories", repos, vscode5.ConfigurationTarget.Global);
-        remoteSkillProvider.refresh();
-        vscode5.window.showInformationMessage(`Removed repository: ${repoToRemove}`);
-      }
-    }),
-    vscode5.commands.registerCommand("antigravity.filterLocalSkills", async () => {
-      const query = await vscode5.window.showInputBox({
-        prompt: "Filter local skills by name",
-        placeHolder: "Enter search text (leave empty to clear)"
-      });
-      if (query !== void 0) {
-        localSkillProvider.setFilter(query);
-      }
-    }),
-    vscode5.commands.registerCommand("antigravity.filterRemoteSkills", async () => {
-      const query = await vscode5.window.showInputBox({
-        prompt: "Filter remote repositories by name",
-        placeHolder: "Enter search text (leave empty to clear)"
-      });
-      if (query !== void 0) {
-        remoteSkillProvider.setFilter(query);
-      }
-    })
-  );
-}
-function deactivate() {
-}
-function getGlobalSkillsPath() {
-  const config = vscode5.workspace.getConfiguration("antigravity");
-  let globalPath = config.get("customGlobalSkillsPath", "").trim();
-  if (!globalPath) {
-    globalPath = path4.join(os2.homedir(), ".gemini", "antigravity", "skills");
-  } else if (globalPath.startsWith("~")) {
-    globalPath = path4.join(os2.homedir(), globalPath.slice(1));
-  }
-  return globalPath;
-}
-async function promptForSkillTarget(skillName) {
-  const globalPath = getGlobalSkillsPath();
-  const globalTarget = path4.join(globalPath, skillName);
-  const workspaceFolders = vscode5.workspace.workspaceFolders;
-  if (!workspaceFolders || workspaceFolders.length === 0) {
-    return globalTarget;
-  }
-  const options = [
-    { label: "$(globe) Global", description: globalTarget, target: globalTarget },
-    ...workspaceFolders.map((f) => {
-      const workspaceTarget = path4.join(f.uri.fsPath, ".gemini", "antigravity", "skills", skillName);
-      return {
-        label: `$(folder) Workspace (${f.name})`,
-        description: workspaceTarget,
-        target: workspaceTarget
-      };
-    })
-  ];
-  const choice = await vscode5.window.showQuickPick(options, {
-    placeHolder: `Where should "${skillName}" be placed?`
-  });
-  return choice ? choice.target : void 0;
-}
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  activate,
-  deactivate
-});
-//# sourceMappingURL=extension.js.map
+${i.message}`}}};c.subscriptions.push(s.workspace.registerTextDocumentContentProvider("antigravity-remote",a)),c.subscriptions.push(s.commands.registerCommand("antigravity.refreshLocalSkills",()=>{r.refresh()}),s.commands.registerCommand("antigravity.refreshRemoteSkills",()=>{o.refresh()}),s.commands.registerCommand("antigravity.githubLogin",async()=>{await e.getToken(!0)&&(s.window.showInformationMessage("Successfully authenticated with GitHub."),o.refresh())}),s.commands.registerCommand("antigravity.installSkill",async t=>{if(!t.githubOwnerRepo||!t.githubPath){s.window.showErrorMessage("Cannot install skill: Missing GitHub metadata on tree item.");return}let i=await B(t.label);i&&(C.existsSync(i)&&await s.window.showWarningMessage(`A skill named "${t.label}" already exists there. Overwrite?`,{modal:!0},"Overwrite")!=="Overwrite"||s.window.withProgress({location:s.ProgressLocation.Notification,title:`Installing ${t.label}...`,cancellable:!1},async n=>{try{await e.downloadFolder(t.githubOwnerRepo,t.githubPath,i),s.commands.executeCommand("antigravity.refreshLocalSkills"),s.window.showInformationMessage(`Successfully installed ${t.label}!`)}catch(d){s.window.showErrorMessage(`Failed to install ${t.label}: ${d.message}`)}}))}),s.commands.registerCommand("antigravity.createSkill",async()=>{let t=await s.window.showInputBox({prompt:"Enter the new skill name (no spaces, e.g., my-awesome-skill)",validateInput:m=>!m||m.includes(" ")?"Name cannot be empty or contain spaces":null});if(!t)return;let i=await B(t);if(!i)return;if(C.existsSync(i)){s.window.showErrorMessage(`Skill directory already exists: ${t}`);return}let n=new I,l=n.getTemplates(t).map(m=>({label:m.name,description:m.description})),u=await s.window.showQuickPick(l,{placeHolder:"Select a structural template for the new skill"});if(u)try{await n.generateTemplate(t,u.label,i),s.window.showInformationMessage(`Successfully created skill: ${t}`),s.commands.executeCommand("antigravity.refreshLocalSkills");let m=b.join(i,"SKILL.md");if(C.existsSync(m)){let $=await s.workspace.openTextDocument(m);s.window.showTextDocument($)}}catch(m){s.window.showErrorMessage(`Failed to create skill: ${m.message}`)}})),c.subscriptions.push(s.commands.registerCommand("antigravity.openSkillFile",async(t,i)=>{if(i&&i.downloadUrl){let n=s.Uri.parse(`antigravity-remote:${i.label}?${i.downloadUrl}`),d=await s.workspace.openTextDocument(n);s.window.showTextDocument(d,{preview:!0})}else if(t.startsWith("http://")||t.startsWith("https://"))s.env.openExternal(s.Uri.parse(t));else{let n=await s.workspace.openTextDocument(t);s.window.showTextDocument(n)}}),s.commands.registerCommand("antigravity.showInvalidSkillError",t=>{s.window.showErrorMessage(`The folder "${t}" does not contain a SKILL.md file. Create one or use the "Create New Skill" command to scaffold a valid skill.`)}),s.commands.registerCommand("antigravity.addRemoteRepo",async()=>{let t=await s.window.showInputBox({prompt:"Enter the GitHub repository (format: owner/repo)",placeHolder:"e.g., rominirani/antigravity-skills",validateInput:d=>/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(d||"")?null:"Invalid format. Must be owner/repo."});if(!t)return;let i=s.workspace.getConfiguration("antigravity"),n=i.get("skillRepositories",[]);if(n.includes(t)){s.window.showInformationMessage(`Repository ${t} is already in your list.`);return}n.push(t),await i.update("skillRepositories",n,s.ConfigurationTarget.Global),o.refresh(),s.window.showInformationMessage(`Added remote repository: ${t}`)}),s.commands.registerCommand("antigravity.removeRemoteRepo",async t=>{if(!t.githubOwnerRepo)return;let i=t.githubOwnerRepo,n=s.workspace.getConfiguration("antigravity"),d=n.get("skillRepositories",[]),l=d.indexOf(i);l>-1&&(d.splice(l,1),await n.update("skillRepositories",d,s.ConfigurationTarget.Global),o.refresh(),s.window.showInformationMessage(`Removed repository: ${i}`))}))}function j(){}function z(){let e=s.workspace.getConfiguration("antigravity").get("customGlobalSkillsPath","").trim();return e?e.startsWith("~")&&(e=b.join(L.homedir(),e.slice(1))):e=b.join(L.homedir(),".gemini","antigravity","skills"),e}async function B(c){let e=z(),r=b.join(e,c),o=s.workspace.workspaceFolders;if(!o||o.length===0)return r;let a=[{label:"$(globe) Global",description:r,target:r},...o.map(i=>{let n=b.join(i.uri.fsPath,".gemini","antigravity","skills",c);return{label:`$(folder) Workspace (${i.name})`,description:n,target:n}})],t=await s.window.showQuickPick(a,{placeHolder:`Where should "${c}" be placed?`});return t?t.target:void 0}0&&(module.exports={activate,deactivate});

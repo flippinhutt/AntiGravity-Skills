@@ -30,12 +30,14 @@
         {
           "id": "antigravity.localSkills",
           "name": "Local Skills",
-          "icon": "$(list-flat)"
+          "icon": "$(list-flat)",
+          "type": "webview"
         },
         {
           "id": "antigravity.remoteSkills",
           "name": "Remote Skills",
-          "icon": "$(globe)"
+          "icon": "$(globe)",
+          "type": "webview"
         }
       ]
     },
@@ -47,17 +49,7 @@
           "group": "navigation"
         },
         {
-          "command": "antigravity.filterLocalSkills",
-          "when": "view == antigravity.localSkills",
-          "group": "navigation"
-        },
-        {
           "command": "antigravity.addRemoteRepo",
-          "when": "view == antigravity.remoteSkills",
-          "group": "navigation"
-        },
-        {
-          "command": "antigravity.filterRemoteSkills",
           "when": "view == antigravity.remoteSkills",
           "group": "navigation"
         }
@@ -133,16 +125,6 @@
         "command": "antigravity.removeRemoteRepo",
         "title": "Remove Repository",
         "icon": "$(trash)"
-      },
-      {
-        "command": "antigravity.filterLocalSkills",
-        "title": "Filter Local Skills",
-        "icon": "$(search)"
-      },
-      {
-        "command": "antigravity.filterRemoteSkills",
-        "title": "Filter Remote Repos",
-        "icon": "$(search)"
       }
     ]
   },

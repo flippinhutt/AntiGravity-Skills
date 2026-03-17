@@ -23,6 +23,8 @@ export class GitHubService {
     static readonly GITHUB_API_URL = 'https://api.github.com';
     static readonly SESSION_OPTIONS: vscode.AuthenticationGetSessionOptions = { createIfNone: false };
 
+    constructor(private readonly _storage?: vscode.Memento) {}
+
     /**
      * Gets a GitHub Token from VSCode's built-in authentication provider.
      */
@@ -30,8 +32,12 @@ export class GitHubService {
         try {
             const session = await vscode.authentication.getSession('github', ['repo'], { createIfNone });
             return session?.accessToken;
-        } catch (error) {
-            console.error('Failed to get GitHub session:', error);
+        } catch (error: any) {
+            if (error?.message?.includes('initialized first')) {
+                console.warn('Antigravity services not yet ready:', error.message);
+            } else {
+                console.error('Failed to get GitHub session:', error);
+            }
             return undefined;
         }
     }
@@ -44,6 +50,9 @@ export class GitHubService {
         const token = await this.getToken();
         const url = `${GitHubService.GITHUB_API_URL}/repos/${ownerRepo}/contents/${path}`;
 
+        const cacheKey = `github-cache:${ownerRepo}:${path}`;
+        const cachedData = this._storage?.get<{ etag: string, data: GitHubContent[] }>(cacheKey);
+
         const headers: Record<string, string> = {
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Antigravity-Skill-Manager-VSCode'
@@ -53,22 +62,39 @@ export class GitHubService {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
+        if (cachedData?.etag) {
+            headers['If-None-Match'] = cachedData.etag;
+        }
+
         try {
             const response = await fetch(url, { headers });
             
+            if (response.status === 304 && cachedData) {
+                console.log(`Cache hit for ${url}`);
+                return cachedData.data;
+            }
+
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(`GitHub API Error (${response.status}): ${text}`);
             }
 
             const data = await response.json() as GitHubContent | GitHubContent[];
+            const result = Array.isArray(data) ? data : [data];
+
+            const etag = response.headers.get('ETag');
+            if (etag && this._storage) {
+                await this._storage.update(cacheKey, { etag, data: result });
+            }
             
-            // GitHub contents API returns an array for directories, and a single object for a file.
-            // Since we're asking for the root (or a folder), we expect an array.
-            return Array.isArray(data) ? data : [data];
+            return result;
             
         } catch (error) {
             console.error(`Error fetching contents for ${ownerRepo}:`, error);
+            // If API fails but we have cached data, return it as fallback
+            if (cachedData) {
+                return cachedData.data;
+            }
             vscode.window.showErrorMessage(`Failed to fetch remote skills from ${ownerRepo}. See extension logs.`);
             return [];
         }
