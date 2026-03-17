@@ -28,4 +28,19 @@ export class SkillItem extends vscode.TreeItem {
       this.iconPath = new vscode.ThemeIcon('symbol-namespace');
     }
   }
+
+  /**
+   * Returns a plain object for webview consumption, avoiding circular references.
+   */
+  public toWebViewItem() {
+    return {
+      label: this.label,
+      description: this.description,
+      fullPath: this.fullPath,
+      itemType: this.itemType,
+      githubOwnerRepo: this.githubOwnerRepo,
+      githubPath: this.githubPath,
+      downloadUrl: this.downloadUrl
+    };
+  }
 }

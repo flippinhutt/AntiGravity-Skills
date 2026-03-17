@@ -87,9 +87,9 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                 return;
             }
             const items = this._type === 'local' ? this._localSkills : this._remoteSkills;
-            const filteredItems = items.filter(item => 
-                item.label.toLowerCase().includes(this._searchQuery)
-            );
+            const filteredItems = items
+                .filter(item => item.label.toLowerCase().includes(this._searchQuery))
+                .map(item => item.toWebViewItem());
             this._view.webview.postMessage({ 
                 type: 'updateItems', 
                 items: filteredItems,
@@ -159,14 +159,14 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         }
 
         if (fs.existsSync(globalPath)) {
-            skills.push(...this._readLocalDir(globalPath, '(Global)'));
+            skills.push(...this._readLocalDir(globalPath, undefined));
         }
 
         if (vscode.workspace.workspaceFolders) {
             for (const folder of vscode.workspace.workspaceFolders) {
                 const localPath = path.join(folder.uri.fsPath, '.gemini', 'antigravity', 'skills');
                 if (fs.existsSync(localPath)) {
-                    skills.push(...this._readLocalDir(localPath, '(Workspace)'));
+                    skills.push(...this._readLocalDir(localPath, undefined));
                 }
             }
         }
@@ -175,7 +175,7 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         this._updateView();
     }
 
-    private _readLocalDir(skillsPath: string, description: string): SkillItem[] {
+    private _readLocalDir(skillsPath: string, description: string | undefined): SkillItem[] {
         const skills: SkillItem[] = [];
         const config = vscode.workspace.getConfiguration('antigravity');
         const hideInvalid = config.get<boolean>('hideInvalidSkills', false);
@@ -223,7 +223,7 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                             return contents.map(item => {
                                 const skillItem = new SkillItem(
                                     item.name,
-                                    item.type === 'dir' ? `(Skill in ${repo})` : undefined,
+                                    undefined,
                                     item.html_url,
                                     item.type === 'dir' ? 'skill' : 'file',
                                     item.type === 'dir' ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None

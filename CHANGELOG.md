@@ -2,6 +2,40 @@
 
 All notable changes to the "antigravity-skill-manager" extension will be documented in this file.
 
+## [1.0.6] - 2026-03-17
+
+### Fixed
+- Resolved `TypeError: Converting circular structure to JSON` in the skills webview by sanitizing `SkillItem` objects.
+- Suppressed unnecessary GitHub API 404 error logs during skill discovery probing.
+- Added retry logic for GitHub authentication to handle timing issues during extension initialization.
+
+### Changed
+- Removed explicit "(Global)", "(Workspace)", and repository labels from skill items for a cleaner UI.
+
+## [1.0.5] - 2026-03-16
+
+### Added
+- Added GitHub repository search functionality
+
+## [1.0.4] - 2026-03-16
+
+### Fixed
+- Fixed issue where the extension was not being published to the marketplace
+- Fixed image in description
+
+### Changed
+- Updated publisher to ryanhutto to fix publishing
+
+## [1.0.3] - 2026-03-16
+
+### Changed
+- Updated repository URL to https://github.com/flippinhutt/AntiGravity-Skills
+
+## [1.0.2] - 2026-03-16
+
+### Added
+- Updated icon to use the official Antigravity logo
+
 ## [1.0.0] - 2026-03-15
 
 ### Added
@@ -13,27 +47,3 @@ All notable changes to the "antigravity-skill-manager" extension will be documen
 - Skill scaffolding from structural templates.
 - Management UI for adding/removing remote GitHub repositories.
 - Customizable global skills path and invalid skill hiding.
-
-## [1.0.2] - 2026-03-16
-
-### Added
-- Updated icon to use the official Antigravity logo
-
-## [1.0.3] - 2026-03-16
-
-### Changed
-- Updated repository URL to https://github.com/flippinhutt/AntiGravity-Skills
-
-## [1.0.4] - 2026-03-16
-
-### Fixed
-- Fixed issue where the extension was not being published to the marketplace
-- Fixed image in description
-
-### Changed
-- Updated publisher to ryanhutto to fix publishing
-
-## [1.0.5] - 2026-03-16
-
-### Added
-- Added GitHub repository search functionality

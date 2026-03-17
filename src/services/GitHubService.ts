@@ -28,13 +28,18 @@ export class GitHubService {
     /**
      * Gets a GitHub Token from VSCode's built-in authentication provider.
      */
-    async getToken(createIfNone: boolean = false): Promise<string | undefined> {
+    async getToken(createIfNone: boolean = false, retries: number = 3): Promise<string | undefined> {
         try {
             const session = await vscode.authentication.getSession('github', ['repo'], { createIfNone });
             return session?.accessToken;
         } catch (error: any) {
             if (error?.message?.includes('initialized first')) {
-                console.warn('Antigravity services not yet ready:', error.message);
+                if (retries > 0) {
+                    console.warn(`Antigravity services not yet ready (retrying in 500ms... ${retries} left):`, error.message);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    return this.getToken(createIfNone, retries - 1);
+                }
+                console.warn('Antigravity services failed to initialize after retries:', error.message);
             } else {
                 console.error('Failed to get GitHub session:', error);
             }
@@ -76,6 +81,10 @@ export class GitHubService {
 
             if (!response.ok) {
                 const text = await response.text();
+                // Don't log 404s as errors, as they are often expected during fallback probing
+                if (response.status !== 404) {
+                    console.error(`GitHub API Error (${response.status}) fetching ${url}: ${text}`);
+                }
                 throw new Error(`GitHub API Error (${response.status}): ${text}`);
             }
 
@@ -90,12 +99,15 @@ export class GitHubService {
             return result;
             
         } catch (error) {
-            console.error(`Error fetching contents for ${ownerRepo}:`, error);
+            // Only log if it's not a standard 404 (which we throw above)
+            if (!(error instanceof Error && error.message.includes('Error (404)'))) {
+                console.error(`Error fetching contents for ${ownerRepo}:`, error);
+            }
+            
             // If API fails but we have cached data, return it as fallback
             if (cachedData) {
                 return cachedData.data;
             }
-            vscode.window.showErrorMessage(`Failed to fetch remote skills from ${ownerRepo}. See extension logs.`);
             return [];
         }
     }
