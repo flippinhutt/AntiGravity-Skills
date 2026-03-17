@@ -32,3 +32,8 @@ All notable changes to the "antigravity-skill-manager" extension will be documen
 
 ### Changed
 - Updated publisher to ryanhutto to fix publishing
+
+## [1.0.5] - 2026-03-16
+
+### Added
+- Added GitHub repository search functionality
