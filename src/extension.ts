@@ -7,6 +7,12 @@ import { GitHubService } from './services/GitHubService';
 import { SkillItem } from './models/SkillItem';
 import { TemplateService, TemplateType } from './services/TemplateService';
 
+/**
+ * Extension entry point. Registers commands, providers, and services for
+ * managing Antigravity skills.
+ * 
+ * @param context The extension context provided by VS Code.
+ */
 export function activate(context: vscode.ExtensionContext) {
     console.log('Antigravity Skill Manager is now active!');
 
