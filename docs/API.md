@@ -37,6 +37,19 @@ The extension's lifecycle is managed by the `activate` and `deactivate` function
     - Dynamically builds the HTML content for the sidebar.
     - Handles message passing for actions like "Install", "Open", or "Delete".
     - **Filtering & Sorting (v1.0.7)**: Implements custom search logic in `_updateView` to ensure `SKILL.md` is always displayed and prioritized at the top of the list, regardless of the active search filter.
+    - **Remote Installation (v1.0.7)**: Added `installSkill` message handler which triggers the extension host's installation command with a `SkillItem`.
+
+---
+
+## Extension Commands
+
+The extension registers several commands in `extension.ts`:
+
+- `antigravity.installSkill`: Recursively downloads a remote skill folder from GitHub using `GitHubService.downloadFolder`. Prompts the user for a destination (Global or Workspace).
+- `antigravity.openSkillFile`: Opens a local file or provides a read-only preview for a remote file via the `antigravity-remote` URI scheme.
+- `antigravity.createSkill`: Scaffolds a new skill from a template using `TemplateService`.
+- `antigravity.githubLogin`: Facilitates GitHub authentication via VS Code's session manager.
+- `antigravity.refreshLocalSkills` / `antigravity.refreshRemoteSkills`: Triggers a refresh of the respective Webview providers.
 
 
 ---

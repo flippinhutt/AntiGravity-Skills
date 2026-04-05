@@ -61,6 +61,12 @@ export function activate(context: vscode.ExtensionContext) {
                  remoteProvider.refresh();
             }
         }),
+        /**
+         * Command to install a remote skill folder to the local machine.
+         * Prompts the user for a target location (Global or Workspace).
+         * 
+         * @param item The SkillItem representing the remote folder to install.
+         */
         vscode.commands.registerCommand('antigravity.installSkill', async (item: SkillItem) => {
              if (!item.githubOwnerRepo || !item.githubPath) {
                  vscode.window.showErrorMessage('Cannot install skill: Missing GitHub metadata on tree item.');

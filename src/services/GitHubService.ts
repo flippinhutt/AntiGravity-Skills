@@ -19,10 +19,16 @@ export interface GitHubContent {
     };
 }
 
+/**
+ * Service for interacting with the GitHub API to fetch and download skill contents.
+ */
 export class GitHubService {
     static readonly GITHUB_API_URL = 'https://api.github.com';
     static readonly SESSION_OPTIONS: vscode.AuthenticationGetSessionOptions = { createIfNone: false };
 
+    /**
+     * @param _storage Optional Memento for caching GitHub API responses.
+     */
     constructor(private readonly _storage?: vscode.Memento) {}
 
     /**
@@ -113,7 +119,12 @@ export class GitHubService {
     }
 
     /**
-     * Recursively downloads a folder from GitHub.
+     * Recursively downloads a folder from GitHub and saves it to the local filesystem.
+     * 
+     * @param ownerRepo String in the format "owner/repo".
+     * @param folderPath The path to the folder within the repository.
+     * @param targetLocalDir The local directory where the folder should be saved.
+     * @throws Error if the download fails.
      */
     async downloadFolder(ownerRepo: string, folderPath: string, targetLocalDir: string): Promise<void> {
         const contents = await this.getRepoContents(ownerRepo, folderPath);

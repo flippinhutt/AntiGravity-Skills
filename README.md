@@ -12,6 +12,7 @@ The Antigravity Skill Manager is a VS Code extension designed to streamline the 
 
 - **🛡️ Always Show SKILL.md**: The `SKILL.md` file is now always visible in search results, ensuring you never lose track of a skill's main documentation.
 - **📑 Improved Sorting**: A cleaner, more predictable sorting system that puts `SKILL.md` first, followed by directories, then other files alphabetically.
+- **🌐 Remote Skill Installation**: You can now install remote skills directly from GitHub into your local storage with a single click.
 
 ## Features
 
@@ -21,9 +22,9 @@ The Antigravity Skill Manager is a VS Code extension designed to streamline the 
 - **File Browsing**: Browse the contents of your skills directly from the sidebar with optimized sorting.
 - **Error Detection**: Identifies skills missing a `SKILL.md` file and provides guidance on how to fix them.
 
-### 🌐 Remote Skill Discovery
+### 🌐 Remote Skill Discovery & Installation
 - **GitHub Integration**: Browse remote repositories for curated Antigravity skills.
-- **One-Click Installation**: Install remote skills directly into your global library or your current workspace.
+- **One-Click Installation**: Install remote skills directly into your global library or your current workspace. Just hover over a skill folder and click the **Install** button.
 - **Read-Only Preview**: View remote `SKILL.md` and other files directly in VS Code before installing.
 
 ### 🛠️ Skill Scaffolding

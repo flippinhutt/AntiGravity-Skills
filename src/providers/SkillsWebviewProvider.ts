@@ -18,6 +18,11 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
     private _remoteSkills: SkillItem[] = [];
     private _currentPath: { type: 'local' | 'remote', path: string, repo?: string } | null = null;
 
+    /**
+     * @param _extensionUri The URI of the extension.
+     * @param _type The type of skills to provide ('local' or 'remote').
+     * @param _githubService Service for GitHub API interactions.
+     */
     constructor(
         private readonly _extensionUri: vscode.Uri,
         private readonly _type: 'local' | 'remote',
@@ -67,6 +72,10 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                     this._goBack();
                     break;
                 case 'installSkill':
+                    /**
+                     * Handle skill installation from remote repositories.
+                     * Triggers the 'antigravity.installSkill' command with the selected item.
+                     */
                     vscode.commands.executeCommand('antigravity.installSkill', data.item);
                     break;
                 case 'createSkill':
@@ -130,7 +139,8 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
             this._view.webview.postMessage({ 
                 type: 'updateItems', 
                 items: filteredItems,
-                canGoBack: this._currentPath !== null
+                canGoBack: this._currentPath !== null,
+                viewType: this._type
             });
         }
     }
@@ -185,10 +195,16 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         this._updateView();
     }
 
+    /**
+     * Refreshes the view from the root path.
+     */
     private _goBack() {
         this.refresh();
     }
 
+    /**
+     * Loads local skills from both global and workspace-specific directories.
+     */
     private _loadLocalSkills() {
         const skills: SkillItem[] = [];
         const config = vscode.workspace.getConfiguration('antigravity');
@@ -217,6 +233,12 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         this._updateView();
     }
 
+    /**
+     * Reads a local directory for skills.
+     * 
+     * @param skillsPath Path to the skills directory.
+     * @param description Optional description override.
+     */
     private _readLocalDir(skillsPath: string, description: string | undefined): SkillItem[] {
         const skills: SkillItem[] = [];
         const config = vscode.workspace.getConfiguration('antigravity');
@@ -249,6 +271,9 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         return skills;
     }
 
+    /**
+     * Loads remote skills from configured GitHub repositories.
+     */
     private async _loadRemoteSkills() {
         const config = vscode.workspace.getConfiguration('antigravity');
         const repos = config.get<string[]>('skillRepositories', []);
@@ -301,6 +326,11 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         this._updateView();
     }
 
+    /**
+     * Generates the HTML content for the webview.
+     * 
+     * @param webview The webview instance.
+     */
     private _getHtmlForWebview(webview: vscode.Webview) {
         return `<!DOCTYPE html>
 			<html lang="en">
@@ -421,6 +451,28 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                         opacity: 0.6;
                         margin-left: 8px;
                         font-style: italic;
+                        flex: 1;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .install-btn {
+                        display: none;
+                        padding: 2px 6px;
+                        font-size: 10px;
+                        background: var(--vscode-button-background);
+                        color: var(--vscode-button-foreground);
+                        border: none;
+                        border-radius: 2px;
+                        cursor: pointer;
+                        margin-left: 8px;
+                        flex-shrink: 0;
+                    }
+                    .install-btn:hover {
+                        background: var(--vscode-button-hoverBackground);
+                    }
+                    .item:hover .install-btn {
+                        display: block;
                     }
                     .loader {
                         padding: 20px;
@@ -474,12 +526,12 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                                 contentDiv.innerHTML = '<div class="loader">Loading...</div>';
                                 break;
 							case 'updateItems':
-								updateItems(message.items, message.canGoBack);
+								updateItems(message.items, message.canGoBack, message.viewType);
 								break;
 						}
 					});
 
-					function updateItems(items, canGoBack) {
+					function updateItems(items, canGoBack, viewType) {
                         toolbar.style.display = canGoBack ? 'flex' : 'none';
 
 						if (items.length === 0) {
@@ -495,13 +547,17 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
 							li.className = 'item';
                             
                             let icon = '📄';
-                            if (item.itemType === 'skill' || item.description?.includes('(Directory)') || item.description?.includes('(Repo Root)')) icon = '📁';
+                            const isSkill = item.itemType === 'skill' || item.description?.includes('(Directory)') || item.description?.includes('(Repo Root)');
+                            if (isSkill) icon = '📁';
                             if (item.label.toLowerCase().includes('skill.md')) icon = '🛡️';
+
+                            const showInstall = viewType === 'remote' && isSkill && item.githubOwnerRepo;
 
 							li.innerHTML = \`
 								<span class="item-icon">\${icon}</span>
 								<span class="item-label">\${item.label}</span>
 								<span class="item-description">\${item.description || ''}</span>
+                                \${showInstall ? '<button class="install-btn" title="Install to Local">Install</button>' : ''}
 							\`;
 							li.addEventListener('click', () => {
 								vscode.postMessage({ 
@@ -510,6 +566,18 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
                                     item: item
                                 });
 							});
+
+                            if (showInstall) {
+                                const installBtn = li.querySelector('.install-btn');
+                                installBtn.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    vscode.postMessage({ 
+                                        type: 'installSkill',
+                                        item: item
+                                    });
+                                });
+                            }
+
 							ul.appendChild(li);
 						});
                         contentDiv.innerHTML = '';
