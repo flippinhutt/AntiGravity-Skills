@@ -5,6 +5,10 @@ import * as os from 'os';
 import { GitHubService } from '../services/GitHubService';
 import { SkillItem } from '../models/SkillItem';
 
+/**
+ * Provider for rendering Antigravity skills in a VS Code Webview.
+ * Supports both local and remote (GitHub) skill discovery and management.
+ */
 export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'antigravity.skills';
 
@@ -20,6 +24,13 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         private readonly _githubService: GitHubService
     ) {}
 
+    /**
+     * Resloves the webview view, sets options, and handles incoming messages.
+     * 
+     * @param webviewView The webview view to resolve.
+     * @param context Context for the webview view.
+     * @param _token Cancellation token.
+     */
     public resolveWebviewView(
         webviewView: vscode.WebviewView,
         context: vscode.WebviewViewResolveContext,
@@ -68,6 +79,9 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         setTimeout(() => this.refresh(), 1000);
     }
 
+    /**
+     * Refreshes the skill list by reloading from the current source (local or remote).
+     */
     public refresh() {
         this._currentPath = null;
         if (this._view) {
@@ -80,6 +94,11 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    /**
+     * Updates the webview content with the latest filtered and sorted skill items.
+     * 
+     * @param loading Whether to show a loading state in the webview.
+     */
     private _updateView(loading: boolean = false) {
         if (this._view) {
             if (loading) {
@@ -88,7 +107,25 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
             }
             const items = this._type === 'local' ? this._localSkills : this._remoteSkills;
             const filteredItems = items
-                .filter(item => item.label.toLowerCase().includes(this._searchQuery))
+                .filter(item => {
+                    const isSkillMd = item.label.toLowerCase() === 'skill.md';
+                    return isSkillMd || item.label.toLowerCase().includes(this._searchQuery);
+                })
+                .sort((a, b) => {
+                    const aLabel = a.label.toLowerCase();
+                    const bLabel = b.label.toLowerCase();
+                    
+                    // 1. SKILL.md always first
+                    if (aLabel === 'skill.md') return -1;
+                    if (bLabel === 'skill.md') return 1;
+                    
+                    // 2. Folders before files
+                    if (a.itemType === 'skill' && b.itemType === 'file') return -1;
+                    if (a.itemType === 'file' && b.itemType === 'skill') return 1;
+                    
+                    // 3. Alphabetical
+                    return a.label.localeCompare(b.label);
+                })
                 .map(item => item.toWebViewItem());
             this._view.webview.postMessage({ 
                 type: 'updateItems', 
@@ -98,6 +135,11 @@ export class SkillsWebviewProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    /**
+     * Drills down into a skill or directory to view its contents.
+     * 
+     * @param item The skill item to explore.
+     */
     private async _drillDown(item: SkillItem) {
         this._updateView(true);
         if (this._type === 'local') {

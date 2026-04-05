@@ -33,7 +33,11 @@ The extension's lifecycle is managed by the `activate` and `deactivate` function
 
 ### `SkillsWebviewProvider`
 - **Purpose**: Implements the `vscode.WebviewViewProvider` interface to render the skill management UI.
-- **Logic**: It dynamically builds the HTML content for the sidebar, handling message passing between the webview and the extension host for actions like "Install", "Open", or "Delete".
+- **Logic**: 
+    - Dynamically builds the HTML content for the sidebar.
+    - Handles message passing for actions like "Install", "Open", or "Delete".
+    - **Filtering & Sorting (v1.0.7)**: Implements custom search logic in `_updateView` to ensure `SKILL.md` is always displayed and prioritized at the top of the list, regardless of the active search filter.
+
 
 ---
 

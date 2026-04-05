@@ -2,6 +2,12 @@
 
 All notable changes to the "antigravity-skill-manager" extension will be documented in this file.
 
+## [1.0.7] - 2026-04-05
+
+### Added
+- **Always Show SKILL.md**: The `SKILL.md` file is now always visible in search results, ensuring the main skill documentation is never hidden.
+- **Improved Sorting**: Implemented a cleaner sorting system that prioritizes `SKILL.md` at the top, followed by directories, and then other files alphabetically.
+
 ## [1.0.6] - 2026-03-17
 
 ### Fixed
