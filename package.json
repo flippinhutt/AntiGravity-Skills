@@ -2,7 +2,7 @@
   "name": "antigravity-skill-manager",
   "displayName": "Antigravity Skill Manager",
   "description": "Manage and build Antigravity skills directly in VSCode",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "icon": "icon.png",
   "publisher": "ryanhutto",
   "license": "MIT",

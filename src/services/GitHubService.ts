@@ -2,16 +2,29 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Represents the structure of a GitHub API content object.
+ */
 export interface GitHubContent {
+    /** Name of the file or directory. */
     name: string;
+    /** Relative path within the repository. */
     path: string;
+    /** SHA of the content. */
     sha: string;
+    /** Size of the file in bytes. */
     size: number;
+    /** API URL for the content. */
     url: string;
+    /** URL to view the content on GitHub web interface. */
     html_url: string;
+    /** Git API URL for the content. */
     git_url: string;
+    /** URL to download the raw content (null for directories). */
     download_url: string | null;
+    /** Type of the content. */
     type: 'file' | 'dir' | 'symlink' | 'submodule';
+    /** Links to self, git, and html representations. */
     _links: {
         self: string;
         git: string;
@@ -54,8 +67,12 @@ export class GitHubService {
     }
 
     /**
-     * Fetches the root contents of a given GitHub repository.
+     * Fetches the root or nested contents of a given GitHub repository.
+     * Use VSCode authentication to increase API rate limits.
+     * 
      * @param ownerRepo String in the format "owner/repo"
+     * @param path The path within the repository to fetch.
+     * @returns A promise that resolves to an array of GitHubContent objects.
      */
     async getRepoContents(ownerRepo: string, path: string = ''): Promise<GitHubContent[]> {
         const token = await this.getToken();

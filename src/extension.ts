@@ -217,9 +217,17 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
+/**
+ * Cleans up extension resources.
+ */
 export function deactivate() {}
 
 // --- Helpers ---
+
+/**
+ * Gets the configured global skills directory.
+ * @returns An absolute path to the global skills folder.
+ */
 
 function getGlobalSkillsPath(): string {
     const config = vscode.workspace.getConfiguration('antigravity');
@@ -232,6 +240,12 @@ function getGlobalSkillsPath(): string {
     return globalPath;
 }
 
+/**
+ * Prompts the user to choose a target location (Global or Workspace) for a skill.
+ * 
+ * @param skillName The name of the skill being handled.
+ * @returns A promise that resolves to the target absolute directory path, or undefined if cancelled.
+ */
 async function promptForSkillTarget(skillName: string): Promise<string | undefined> {
     const globalPath = getGlobalSkillsPath();
     const globalTarget = path.join(globalPath, skillName);

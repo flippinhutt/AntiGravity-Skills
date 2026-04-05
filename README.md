@@ -8,8 +8,10 @@ Manage and build Antigravity skills directly in Visual Studio Code.
 
 The Antigravity Skill Manager is a VS Code extension designed to streamline the lifecycle of Antigravity skills. It provides a dedicated sidebar for managing local skills, discovering remote skills from GitHub, and scaffolding new skills from templates.
 
-## What's New in 1.0.7
+## What's New in 1.0.8
 
+- **📝 Comprehensive Documentation**: Full JSDoc coverage across the codebase for improved maintainability.
+- **🚀 Enhanced Publishing**: Optimized release workflow for both VS Code Marketplace and Open VSX.
 - **🛡️ Always Show SKILL.md**: The `SKILL.md` file is now always visible in search results, ensuring you never lose track of a skill's main documentation.
 - **📑 Improved Sorting**: A cleaner, more predictable sorting system that puts `SKILL.md` first, followed by directories, then other files alphabetically.
 - **🌐 Remote Skill Installation**: You can now install remote skills directly from GitHub into your local storage with a single click.

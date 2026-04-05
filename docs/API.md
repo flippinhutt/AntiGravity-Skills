@@ -36,8 +36,9 @@ The extension's lifecycle is managed by the `activate` and `deactivate` function
 - **Logic**: 
     - Dynamically builds the HTML content for the sidebar.
     - Handles message passing for actions like "Install", "Open", or "Delete".
-    - **Filtering & Sorting (v1.0.7)**: Implements custom search logic in `_updateView` to ensure `SKILL.md` is always displayed and prioritized at the top of the list, regardless of the active search filter.
-    - **Remote Installation (v1.0.7)**: Added `installSkill` message handler which triggers the extension host's installation command with a `SkillItem`.
+    - **Filtering & Sorting (v1.0.7+)**: Implements custom search logic to ensure `SKILL.md` is always displayed and prioritized at the top of the list.
+    - **Remote Installation (v1.0.7+)**: Added `installSkill` message handler which triggers the extension host's installation command.
+    - **Documentation (v1.0.8)**: Full JSDoc coverage for all services and providers to support developer onboarding and maintainability.
 
 ---
 

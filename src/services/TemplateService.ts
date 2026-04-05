@@ -1,14 +1,26 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * Supported skill template types.
+ */
 export type TemplateType = 'Minimal' | 'Script-based' | 'Multi-agent';
 
+/**
+ * Structure of a skill template definition.
+ */
 export interface SkillTemplate {
+    /** Name of the template. */
     name: TemplateType;
+    /** Short description of what the template provides. */
     description: string;
+    /** Key-value pairs of relative file paths and their contents. */
     files: { [relativePath: string]: string };
 }
 
+/**
+ * Service for generating new Antigravity skills from predefined templates.
+ */
 export class TemplateService {
     
     private getMinimalTemplate(skillName: string): SkillTemplate {
@@ -74,6 +86,11 @@ Run the steps defined by the Planner.
         };
     }
 
+    /**
+     * Gets a list of all available skill templates.
+     * @param skillName The name of the new skill.
+     * @returns An array of SkillTemplate objects.
+     */
     public getTemplates(skillName: string): SkillTemplate[] {
         return [
             this.getMinimalTemplate(skillName),
@@ -82,6 +99,14 @@ Run the steps defined by the Planner.
         ];
     }
 
+    /**
+     * Generates a new skill from a template and saves it to a target directory.
+     * 
+     * @param skillName Name of the skill to be generated.
+     * @param templateName The template type to use.
+     * @param targetDir The directory to save the skill into.
+     * @throws Error if the template type is not found.
+     */
     public async generateTemplate(skillName: string, templateName: TemplateType, targetDir: string): Promise<void> {
         const templates = this.getTemplates(skillName);
         const template = templates.find(t => t.name === templateName);
